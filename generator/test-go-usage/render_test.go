@@ -1,9 +1,9 @@
 package testgousage
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
-	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -14,13 +14,10 @@ var expected string
 
 func Test(t *testing.T) {
 	component := TestComponent()
-	component.Render(context.Background(), os.Stdout)
+	buf := bytes.Buffer{}
+	component.Render(context.Background(), &buf)
 	// TODO: use gofmt printer on both and cmp diff
-
-	// use cmp diff to compare:
-	// cmp.Diff(component, expected)
-
-	if diff := cmp.Diff(component, expected); diff != "" {
+	if diff := cmp.Diff(buf.String(), expected); diff != "" {
 		t.Error(diff)
 	}
 }

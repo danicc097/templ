@@ -14,8 +14,8 @@ var goTemplateParser = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, 
 	start := pi.Position()
 
 	// gotempl FuncName(...) {
-	var te templateExpression
-	if te, ok, err = templateExpressionParser.Parse(pi); err != nil || !ok {
+	var te gotemplateExpression
+	if te, ok, err = gotemplateExpressionParser.Parse(pi); err != nil || !ok {
 		return
 	}
 	r.Expression = te.Expression
@@ -29,7 +29,7 @@ var goTemplateParser = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, 
 	}
 
 	if !ok {
-		err = parse.Error("templ: expected nodes in templ body, but found none", pi.Position())
+		err = parse.Error("gotempl: expected nodes in gotempl body, but found none", pi.Position())
 		return
 	}
 	r.Children = nodes.Nodes
@@ -42,7 +42,7 @@ var goTemplateParser = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, 
 
 	// Try for }
 	if _, ok, err = closeBraceWithOptionalPadding.Parse(pi); err != nil || !ok {
-		err = parse.Error("template: missing closing brace", pi.Position())
+		err = parse.Error("gotempl: missing closing brace", pi.Position())
 		return
 	}
 

@@ -155,6 +155,9 @@ outer:
 		if err != nil {
 			return tf, false, err
 		}
+		// fmt.Printf("gon.Children: %v\n", gon.Children)
+		// fmt.Printf("gon.Expression: %v\n", gon.Expression)
+		// fmt.Printf("gon.Range: %v\n", gon.Range)
 		if ok {
 			tf.Nodes = append(tf.Nodes, gon)
 			_, _, _ = parse.OptionalWhitespace.Parse(pi)
