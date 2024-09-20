@@ -27,6 +27,7 @@ var goTemplateParser = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, 
 	if err != nil {
 		return
 	}
+
 	if !ok {
 		err = parse.Error("templ: expected nodes in templ body, but found none", pi.Position())
 		return
