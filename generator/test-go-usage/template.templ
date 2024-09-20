@@ -21,16 +21,22 @@ gotempl Package() {
   // rawgo syntax in other templates not experimental anymore.
   // can remain the same in gotempl expressions for consistency
   {{ first := items[0] }}
-	{{ for i := 0; i < 3; i++ }}
+  // {{ // will only support range in for }}
+	{{ for _, i := range items }}
 		{ fmt.Sprintf("%s--%s",ab(), first) }
-		{{ switch i }}
-			{{ case 1 }}
-        // comment for a
-				{ a }
-			{{ case 2 }}
-        // comment for b
-				{ b }
-		{{ end }}
+    // {{ if }}
+    // {{ else if }}
+    // {{ else }}
+    // {{ end }}
+    // {{ // probably not worth it to implement switch }}
+		// {{ switch i }}
+		// 	{{ case 1 }}
+    //     // comment for a
+		// 		{ a }
+		// 	{{ case 2 }}
+    //     // comment for b
+		// 		{ b }
+		// {{ end }}
 	{{ end }}
   for i := 0; i < 3; i++ {
     println("z")
