@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path"
@@ -53,6 +54,10 @@ func WalkFiles(ctx context.Context, path string, out chan fsnotify.Event) (err e
 		if !shouldIncludeFile(absPath) {
 			return nil
 		}
+		if !strings.HasPrefix(absPath, "/home/daniel/Repos/github.com/danicc097/templ/generator/test-go-usage/") {
+			return nil
+		}
+		fmt.Printf("absPath: %v\n", absPath)
 		out <- fsnotify.Event{
 			Name: absPath,
 			Op:   fsnotify.Create,
