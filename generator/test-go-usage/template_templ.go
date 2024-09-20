@@ -7,6 +7,17 @@ package testgousage
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "fmt"
+
+const a = "fefse"
+
+func ab() {
+	fmt.Printf("a")
+	for i := 0; i < 10; i++ {
+		fmt.Printf("a: %v\n", a)
+	}
+}
+
 func Package() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -31,6 +42,9 @@ func Package() templ.Component {
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("package testgousage")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
+		}
+		for i := 0; i < 10; i++ {
+			fmt.Print(a)
 		}
 		return templ_7745c5c3_Err
 	})
