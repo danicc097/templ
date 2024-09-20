@@ -22,6 +22,10 @@ func parseGoFuncDecl(prefix string, pi *parse.Input) (name string, expression Ex
 	return name, NewExpression(expr, pi.PositionAt(from+len(prefix)), to), nil
 }
 
+func parseGoTemplFuncDecl(pi *parse.Input) (name string, expression Expression, err error) {
+	return parseGoFuncDecl("gotempl", pi)
+}
+
 func parseTemplFuncDecl(pi *parse.Input) (name string, expression Expression, err error) {
 	return parseGoFuncDecl("templ", pi)
 }

@@ -60,8 +60,10 @@ func NewTemplateFileParser(pkg string) TemplateFileParser {
 	}
 }
 
-var ErrLegacyFileFormat = errors.New("legacy file format - run templ migrate")
-var ErrTemplateNotFound = errors.New("template not found")
+var (
+	ErrLegacyFileFormat = errors.New("legacy file format - run templ migrate")
+	ErrTemplateNotFound = errors.New("template not found")
+)
 
 type TemplateFileParser struct {
 	DefaultPackage string
@@ -147,6 +149,18 @@ outer:
 			continue
 		}
 
+		// gotempl Name()
+		var gon GoTemplate
+		gon, ok, err = goTemplateParser.Parse(pi)
+		if err != nil {
+			return tf, false, err
+		}
+		if ok {
+			tf.Nodes = append(tf.Nodes, gon)
+			_, _, _ = parse.OptionalWhitespace.Parse(pi)
+			continue
+		}
+
 		// Anything that isn't template content is Go code.
 		code := new(strings.Builder)
 		from := pi.Position()
@@ -158,7 +172,7 @@ outer:
 			if l, ok, err = stringUntilNewLineOrEOF.Parse(pi); err != nil {
 				return
 			}
-			hasTemplatePrefix := strings.HasPrefix(l, "templ ") || strings.HasPrefix(l, "css ") || strings.HasPrefix(l, "script ")
+			hasTemplatePrefix := strings.HasPrefix(l, "templ ") || strings.HasPrefix(l, "css ") || strings.HasPrefix(l, "script ") || strings.HasPrefix(l, "gotempl ")
 			if hasTemplatePrefix && strings.Contains(l, "(") {
 				// Unread the line.
 				pi.Seek(last)

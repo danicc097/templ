@@ -1219,3 +1219,33 @@ func formatFunctionArguments(expression string) string {
 	}
 	return string(source)
 }
+
+// Go template definition.
+//
+//	gotempl Name() {
+//		package main
+//		func main() {
+//			println("hi")
+//		}
+//	}
+type GoTemplate struct {
+	Range      Range
+	Expression Expression
+	Children   []Node
+}
+
+func (t GoTemplate) IsTemplateFileNode() bool { return true }
+
+func (t GoTemplate) Write(w io.Writer, indent int) error {
+	source := formatFunctionArguments(t.Expression.Value)
+	if err := writeIndent(w, indent, "gotempl ", string(source), " {\n"); err != nil {
+		return err
+	}
+	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
+		return err
+	}
+	if err := writeIndent(w, indent, "}"); err != nil {
+		return err
+	}
+	return nil
+}

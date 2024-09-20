@@ -1,0 +1,28 @@
+package testgousage
+
+import (
+	"fmt"
+	"math"
+)
+
+const funcName = "MyFunc"
+
+gotempl Quotes() {
+	package testgousage
+
+  import (
+    "fmt"
+  )
+
+  func {funcName}() {
+    {{ for i := 0; i < 2; i++ }}
+      {fmt.Sprintf("println(\"%d\""), i)}
+    {{ end }}
+  }
+}
+
+
+// Combine all tests.
+templ TestComponent() {
+	@Quotes()
+}

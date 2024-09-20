@@ -218,6 +218,10 @@ func (g *generator) writeTemplateNodes() error {
 			if err := g.writeScript(n); err != nil {
 				return err
 			}
+		case parser.GoTemplate:
+			if err := g.writeGoTemplate(i, n); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("unknown node type: %v", reflect.TypeOf(n))
 		}
@@ -373,6 +377,109 @@ func (g *generator) writeTemplBuffer(indentLevel int) (err error) {
 		return err
 	}
 	return
+}
+
+func (g *generator) writeGoTemplate(nodeIdx int, t parser.GoTemplate) error {
+	var r parser.Range
+	var err error
+	var indentLevel int
+
+	// func
+	if _, err = g.w.Write("func "); err != nil {
+		return err
+	}
+	// (r *Receiver) Name(params []string)
+	if r, err = g.w.Write(t.Expression.Value); err != nil {
+		return err
+	}
+	g.sourceMap.Add(t.Expression, r)
+	// templ.Component {
+	if _, err = g.w.Write(" templ.Component {\n"); err != nil {
+		return err
+	}
+	indentLevel++
+	// return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+	if _, err = g.w.WriteIndent(indentLevel, "return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {\n"); err != nil {
+		return err
+	}
+	{
+		indentLevel++
+		if _, err = g.w.WriteIndent(indentLevel, "templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context\n"); err != nil {
+			return err
+		}
+		if _, err = g.w.WriteIndent(indentLevel, "if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {\n"); err != nil {
+			return err
+		}
+		{
+			indentLevel++
+			if _, err = g.w.WriteIndent(indentLevel, "return templ_7745c5c3_CtxErr"); err != nil {
+				return err
+			}
+			indentLevel--
+		}
+		if _, err = g.w.WriteIndent(indentLevel, "}\n"); err != nil {
+			return err
+		}
+		if err := g.writeTemplBuffer(indentLevel); err != nil {
+			return err
+		}
+		// ctx = templ.InitializeContext(ctx)
+		if _, err = g.w.WriteIndent(indentLevel, "ctx = templ.InitializeContext(ctx)\n"); err != nil {
+			return err
+		}
+		g.childrenVar = g.createVariableName()
+		// templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		// if templ_7745c5c3_Var1 == nil {
+		//  	templ_7745c5c3_Var1 = templ.NopComponent
+		// }
+		if _, err = g.w.WriteIndent(indentLevel, fmt.Sprintf("%s := templ.GetChildren(ctx)\n", g.childrenVar)); err != nil {
+			return err
+		}
+		if _, err = g.w.WriteIndent(indentLevel, fmt.Sprintf("if %s == nil {\n", g.childrenVar)); err != nil {
+			return err
+		}
+		{
+			indentLevel++
+			if _, err = g.w.WriteIndent(indentLevel, fmt.Sprintf("%s = templ.NopComponent\n", g.childrenVar)); err != nil {
+				return err
+			}
+			indentLevel--
+		}
+		if _, err = g.w.WriteIndent(indentLevel, "}\n"); err != nil {
+			return err
+		}
+		// ctx = templ.ClearChildren(children)
+		if _, err = g.w.WriteIndent(indentLevel, "ctx = templ.ClearChildren(ctx)\n"); err != nil {
+			return err
+		}
+		// Nodes.
+		if err = g.writeNodes(indentLevel, stripWhitespace(t.Children), nil); err != nil {
+			return err
+		}
+		// return templ_7745c5c3_Err
+		if _, err = g.w.WriteIndent(indentLevel, "return templ_7745c5c3_Err\n"); err != nil {
+			return err
+		}
+		indentLevel--
+	}
+	// })
+	if _, err = g.w.WriteIndent(indentLevel, "})\n"); err != nil {
+		return err
+	}
+	indentLevel--
+	// }
+
+	// Note: gofmt wants to remove a single empty line at the end of a file
+	// so we have to make sure we don't output one if this is the last node.
+	closingBrace := "}\n\n"
+	if nodeIdx+1 >= len(g.tf.Nodes) {
+		closingBrace = "}\n"
+	}
+
+	if _, err = g.w.WriteIndent(indentLevel, closingBrace); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (g *generator) writeTemplate(nodeIdx int, t parser.HTMLTemplate) error {
