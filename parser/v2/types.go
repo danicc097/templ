@@ -610,6 +610,9 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 		if isWhitespace {
 			continue
 		}
+		if nodes[i] == nil {
+			continue
+		}
 		if err := nodes[i].Write(w, level); err != nil {
 			return err
 		}

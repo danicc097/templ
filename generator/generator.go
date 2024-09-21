@@ -671,11 +671,8 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 		// Do not render Go comments in the output HTML.
 		return
 	case parser.GoForExpression:
-		err = g.writeForExpression(indentLevel, parser.ForExpression{
-			Expression: n.Expression,
-			Children:   n.Children,
-		}, next)
-	case nil: // empty comment blocks in gotempl
+		err = g.writeForExpression(indentLevel, parser.ForExpression(n), next)
+	case nil: // empty comment blocks in gotempl should be kept in the template but not rendered
 		return
 	default:
 		return fmt.Errorf("unhandled type: %v", reflect.TypeOf(n))

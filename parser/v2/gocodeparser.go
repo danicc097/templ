@@ -5,25 +5,37 @@ import (
 	"github.com/a-h/templ/parser/v2/goexpression"
 )
 
-var newLine = parse.Any(parse.String("\r\n"), parse.Rune('\n'))
-
 var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
+	src, _ := pi.Peek(-1)
+	startPos := pi.Position()
 	// Check the prefix first.
 	if _, ok, err = parse.Or(parse.String("{{ "), parse.String("{{")).Parse(pi); err != nil || !ok {
 		return
 	}
+	var r GoCode
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)
+	commentStartPos := pi.Position()
 	_, _, _ = goTemplComment.Parse(pi)
+	commentEndPos := pi.Position()
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)
 
+	// there is only a comment, nothing else
 	if _, ok, _ = dblCloseBraceWithOptionalPadding.Parse(pi); ok {
-		// there were only comments
-		return
+		commentStartPosIndex := commentStartPos.Index - startPos.Index
+		commentEndPosIndex := commentEndPos.Index - startPos.Index
+		if commentStartPosIndex-commentEndPosIndex > 0 || commentEndPosIndex > len(src) {
+		} else {
+			commentExpr := src[commentStartPosIndex:commentEndPosIndex]
+
+			// There were only comments.
+			// Return them so they can be printed in .templ files (but not in _templ.go)
+			r.Expression = NewExpression(commentExpr, commentStartPos, commentEndPos)
+		}
+		return r, true, nil
 	}
 
 	// Once we have a prefix, we must have an expression that returns a string, with optional err.
 	l := pi.Position().Line
-	var r GoCode
 	if r.Expression, err = parseGo("go code", pi, goexpression.Expression); err != nil {
 		return r, false, err
 	}

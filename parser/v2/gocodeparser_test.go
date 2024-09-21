@@ -108,22 +108,29 @@ func TestGoCodeParser(t *testing.T) {
 				Multiline:     true,
 			},
 		},
+		// gocode parser eats until }}
 		{
 			name:  "comments in expression 2",
 			input: `{{ // Comment only }}`,
 			expected: GoCode{
-				Expression:    Expression{},
+				Expression: Expression{
+					Value: "// Comment only",
+					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
+				},
 				TrailingSpace: SpaceNone,
-				Multiline:     true,
+				Multiline:     false,
 			},
 		},
 		{
 			name:  "comments in expression 3",
 			input: `{{ /* Comment only */ }}`,
 			expected: GoCode{
-				Expression:    Expression{},
+				Expression: Expression{
+					Value: "/* Comment only */",
+					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 21, Line: 0, Col: 21}},
+				},
 				TrailingSpace: SpaceNone,
-				Multiline:     true,
+				Multiline:     false,
 			},
 		},
 	}

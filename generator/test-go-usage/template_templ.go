@@ -49,6 +49,10 @@ func Package() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		// this should not be printed
+		// this should not be printed
+
+		// this should not be printed
 		y := "y"
 		first := items[0]
 		for _, i := range items {
