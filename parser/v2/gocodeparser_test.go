@@ -64,15 +64,14 @@ func TestGoCodeParser(t *testing.T) {
 			}}`,
 			expected: GoCode{
 				Expression: Expression{
-					Value: `
-				p := func() {
+					Value: `p := func() {
 					dosomething()
 				}`,
 					Range: Range{
 						From: Position{
-							Index: 2,
-							Line:  0,
-							Col:   2,
+							Index: 7,
+							Line:  1,
+							Col:   4,
 						},
 						To: Position{
 							Index: 45,
@@ -85,7 +84,7 @@ func TestGoCodeParser(t *testing.T) {
 			},
 		},
 		{
-			name: "comments in expression",
+			name: "comments in expression 1",
 			input: `{{
 	one := "one"
 	two := "two"
@@ -95,17 +94,34 @@ func TestGoCodeParser(t *testing.T) {
 }}`,
 			expected: GoCode{
 				Expression: Expression{
-					Value: `
-	one := "one"
+					Value: `one := "one"
 	two := "two"
 	// Comment in middle of expression.
 	four := "four"
 	// Comment at end of expression.`,
 					Range: Range{
-						From: Position{Index: 2, Line: 0, Col: 2},
+						From: Position{Index: 4, Line: 1, Col: 1},
 						To:   Position{Index: 117, Line: 5, Col: 33},
 					},
 				},
+				TrailingSpace: SpaceNone,
+				Multiline:     true,
+			},
+		},
+		{
+			name:  "comments in expression 2",
+			input: `{{ // Comment only }}`,
+			expected: GoCode{
+				Expression:    Expression{},
+				TrailingSpace: SpaceNone,
+				Multiline:     true,
+			},
+		},
+		{
+			name:  "comments in expression 3",
+			input: `{{ /* Comment only */ }}`,
+			expected: GoCode{
+				Expression:    Expression{},
 				TrailingSpace: SpaceNone,
 				Multiline:     true,
 			},
@@ -121,6 +137,12 @@ func TestGoCodeParser(t *testing.T) {
 			}
 			if !ok {
 				t.Fatalf("unexpected failure for input %q", tt.input)
+			}
+			if (an == nil) != (tt.expected.Expression.Value == "") {
+				t.Fatalf("no node, but a value was expected")
+			}
+			if an == nil {
+				return
 			}
 			actual := an.(GoCode)
 			if diff := cmp.Diff(tt.expected, actual); diff != "" {

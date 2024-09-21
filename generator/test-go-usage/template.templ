@@ -5,30 +5,42 @@ import "fmt"
 const a = "a"
 const b = "b"
 const c = "c"
-var items = [...]int{1,2,3}
+
+var items = [...]int{1, 2, 3}
 
 func ab() string {
 	return `"ab"`
 }
-
+/*
+rawgo syntax in base templ not experimental anymore.
+can adopt the same in gotempl expressions for consistency
+*/
 gotempl Package() {
 	/*
-  Package testgousage.
-  */
+	Package testgousage.
+	*/
 	package testgousage
-	// comment
-  // rawgo syntax in other templates not experimental anymore.
-  // can remain the same in gotempl expressions for consistency
-  {{ first := items[0] }}
-	{{ for _, i := range items }}
-		{ fmt.Sprintf("// %s-%d-%d",ab(), i, first) }
-	{{ end }}
-  const z = "z"
 
-  // FIXME: for not being parsed as plain text
-  // for i := 0; i < 3; i++ {
-  //   println("z")
-  // }
+	// A comment that should be rendered
+	/* Another comment that should be rendered
+  */
+
+  {{// this should not be printed }}
+  {{// this should not be printed
+  }}{{
+    // this should not be printed }}
+	{{/* this should not be printed */
+y := "y"
+	}}
+	{{ first := items[0] }}
+	 {{ for _, i := range items }}
+		{ fmt.Sprintf("// %s-%d-%d-%s",ab(), i, first, y) }
+	{{ end }}
+	const z = "z"
+	// FIXME: for not being parsed as plain text
+	// for i := 0; i < 3; i++ {
+	//   println("z")
+	// }
 }
 
 // Combine all tests.

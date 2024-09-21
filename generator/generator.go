@@ -664,7 +664,6 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 		err = g.writeWhitespace(indentLevel, n)
 	case parser.Text:
 		err = g.writeText(indentLevel, n)
-	// TODO: is {{ // or /* }} already parsed as go expression?
 	case parser.GoComment:
 		// Do not render Go comments in the output HTML.
 		return
@@ -673,6 +672,8 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 			Expression: n.Expression,
 			Children:   n.Children,
 		}, next)
+	case nil: // empty comment blocks in gotempl
+		return
 	default:
 		return fmt.Errorf("unhandled type: %v", reflect.TypeOf(n))
 	}

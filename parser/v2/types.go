@@ -1241,7 +1241,6 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 	if err := writeIndent(w, indent, "gotempl ", string(source), " {\n"); err != nil {
 		return err
 	}
-
 	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
 		return err
 	}

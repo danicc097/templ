@@ -19,6 +19,11 @@ func ab() string {
 	return `"ab"`
 }
 
+/*
+rawgo syntax in base templ not experimental anymore.
+can adopt the same in gotempl expressions for consistency
+*/
+
 func Package() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -40,16 +45,17 @@ func Package() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("/* Package testgousage. */ package testgousage // comment // rawgo syntax in other templates not experimental anymore. // can remain the same in gotempl expressions for consistency")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("/* Package testgousage. */ package testgousage // A comment that should be rendered /* Another comment that should be rendered */")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		y := "y"
 		first := items[0]
 		for _, i := range items {
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d", ab(), i, first))
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 24, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 37, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

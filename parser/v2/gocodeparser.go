@@ -5,9 +5,19 @@ import (
 	"github.com/a-h/templ/parser/v2/goexpression"
 )
 
+var newLine = parse.Any(parse.String("\r\n"), parse.Rune('\n'))
+
 var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	// Check the prefix first.
 	if _, ok, err = parse.Or(parse.String("{{ "), parse.String("{{")).Parse(pi); err != nil || !ok {
+		return
+	}
+	_, _, _ = parse.OptionalWhitespace.Parse(pi)
+	_, _, _ = goTemplComment.Parse(pi)
+	_, _, _ = parse.OptionalWhitespace.Parse(pi)
+
+	if _, ok, _ = dblCloseBraceWithOptionalPadding.Parse(pi); ok {
+		// there were only comments
 		return
 	}
 
