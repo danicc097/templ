@@ -1,4 +1,4 @@
-from vscode ext:
+from vscode ext :
 
 ```go
 package main
