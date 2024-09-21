@@ -66,7 +66,6 @@ func If(content string) (start, end int, err error) {
 }
 
 func For(content string) (start, end int, err error) {
-	fmt.Printf("content: %v\n", content)
 	if !strings.HasPrefix(content, "for") {
 		return 0, 0, ErrExpectedNodeNotFound
 	}

@@ -9,13 +9,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
 
-const a = "fefse"
+const a = "a"
 
-func ab() {
-	fmt.Printf("a")
-	for i := 0; i < 10; i++ {
-		fmt.Printf("a: %v\n", a)
-	}
+func ab() string {
+	return fmt.Sprintf("a: %q\n", a)
 }
 
 func Package() templ.Component {

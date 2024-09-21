@@ -151,7 +151,7 @@ outer:
 
 		// gotempl Name()
 		var gon GoTemplate
-		gon, ok, err = goTemplateParser.Parse(pi)
+		gon, ok, err = gotemplate.Parse(pi)
 		if err != nil {
 			return tf, false, err
 		}

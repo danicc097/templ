@@ -244,7 +244,7 @@ func (h *FSEventHandler) generate(ctx context.Context, fileName string) (goUpdat
 	formattedGoCode, err := format.Source(b.Bytes())
 	if err != nil {
 		err = remapErrorList(err, sourceMap, fileName)
-		fmt.Printf("b.String(): %v\n", b.String())
+		fmt.Printf("formattedGoCode err: %v\n", b.String())
 		return false, false, nil, fmt.Errorf("% source formatting error %w", fileName, err)
 	}
 
