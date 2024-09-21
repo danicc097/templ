@@ -101,7 +101,7 @@ type generator struct {
 	fileName string
 	// skipCodeGeneratedComment skips the code generated comment at the top of the file.
 	skipCodeGeneratedComment bool
-	unescapeStrings          bool
+	gotemplMode              bool
 }
 
 func (g *generator) generate() (err error) {
@@ -220,11 +220,11 @@ func (g *generator) writeTemplateNodes() error {
 				return err
 			}
 		case parser.GoTemplate:
-			g.unescapeStrings = true
+			g.gotemplMode = true
 			if err := g.writeGoTemplate(i, n); err != nil {
 				return err
 			}
-			g.unescapeStrings = false
+			g.gotemplMode = false
 		default:
 			return fmt.Errorf("unknown node type: %v", reflect.TypeOf(n))
 		}
@@ -456,6 +456,7 @@ func (g *generator) writeGoTemplate(nodeIdx int, t parser.GoTemplate) error {
 			return err
 		}
 		// Nodes.
+		// TODO: might need to remove strip
 		if err = g.writeNodes(indentLevel, stripWhitespace(t.Children), nil); err != nil {
 			return err
 		}
@@ -623,6 +624,10 @@ func stripLeadingAndTrailingWhitespace(nodes []parser.Node) []parser.Node {
 
 func (g *generator) writeNodes(indentLevel int, nodes []parser.Node, next parser.Node) error {
 	for i, curr := range nodes {
+		if g.gotemplMode {
+			// FIXME: gotempl node concat results in no newlines
+			// g.w.WriteStringLiteral(indentLevel, "\n")
+		}
 		var nextNode parser.Node
 		if i+1 < len(nodes) {
 			nextNode = nodes[i+1]
@@ -1505,7 +1510,7 @@ func (g *generator) writeStringExpression(indentLevel int, e parser.Expression) 
 
 	// _, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(vn)
 	s := "templ.EscapeString(" + vn + ")"
-	if g.unescapeStrings {
+	if g.gotemplMode {
 		s = vn
 	}
 	if _, err = g.w.WriteIndent(indentLevel, "_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("+s+")\n"); err != nil {

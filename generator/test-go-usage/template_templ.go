@@ -49,17 +49,16 @@ func Package() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		// this should not be printed
-		// this should not be printed
-
-		// this should not be printed
+		/* this should not be printed */
+		/* this should not be printed */
 		y := "y"
+		/**/
 		first := items[0]
 		for _, i := range items {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 37, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 35, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 			if templ_7745c5c3_Err != nil {
@@ -70,7 +69,7 @@ func Package() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("const z = \"z\" // FIXME: for not being parsed as plain text // for i := 0; i < 3; i++ { //   println(\"z\") // }")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("const z = \"z\" for i := 0; i < 3; i++ { println(\"z\") } // FIXME: for not being parsed as plain text // for i := 0; i < 3; i++ { //   println(\"z\") // }")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,9 +1,15 @@
 package parser
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/a-h/parse"
 	"github.com/a-h/templ/parser/v2/goexpression"
 )
+
+// temp until fix
+var ErrSingleLineCommentInGotempl = errors.New("Use /**/ syntax for single line comments")
 
 var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	src, _ := pi.Peek(-1)
@@ -12,24 +18,32 @@ var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	if _, ok, err = parse.Or(parse.String("{{ "), parse.String("{{")).Parse(pi); err != nil || !ok {
 		return
 	}
+	hasLineComment := peekPrefix(pi, "//")
+	if hasLineComment && !strings.Contains(src, "\n") {
+		return GoCode{}, false, ErrSingleLineCommentInGotempl
+	}
 	var r GoCode
+	var pi2 *parse.Input
+	pi2 = parse.NewInput(src)
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)
-	commentStartPos := pi.Position()
-	_, _, _ = goTemplComment.Parse(pi)
-	commentEndPos := pi.Position()
-	_, _, _ = parse.OptionalWhitespace.Parse(pi)
+	commentStartPos := pi2.Position()
+	_, _, _ = goTemplComment.Parse(pi2)
+	commentEndPos := pi2.Position()
+	_, _, _ = parse.OptionalWhitespace.Parse(pi2)
 
 	// there is only a comment, nothing else
-	if _, ok, _ = dblCloseBraceWithOptionalPadding.Parse(pi); ok {
+	if _, ok, _ = dblCloseBraceWithOptionalPadding.Parse(pi2); ok {
 		commentStartPosIndex := commentStartPos.Index - startPos.Index
 		commentEndPosIndex := commentEndPos.Index - startPos.Index
-		if commentStartPosIndex-commentEndPosIndex > 0 || commentEndPosIndex > len(src) {
-		} else {
+		if commentEndPosIndex-commentStartPosIndex > 0 && commentEndPosIndex <= len(src) {
 			commentExpr := src[commentStartPosIndex:commentEndPosIndex]
 
-			// There were only comments.
+			// There were only comments and the end of the gotempl expression was found
 			// Return them so they can be printed in .templ files (but not in _templ.go)
 			r.Expression = NewExpression(commentExpr, commentStartPos, commentEndPos)
+		} else {
+			// empty {{ }}, delete it
+			return GoCode{}, false, nil
 		}
 		return r, true, nil
 	}

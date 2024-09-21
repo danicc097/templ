@@ -42,10 +42,7 @@ func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error)
 	var r GoForExpression
 	start := pi.Index()
 
-	// Strip leading whitespace and look for `{{ for `.
-	if _, _, err = parse.OptionalWhitespace.Parse(pi); err != nil {
-		return r, false, err
-	}
+	_, _, _ = parse.OptionalWhitespace.Parse(pi)
 
 	// Detect the `{{ for ` syntax, allowing for optional spaces around `{{`.
 	if _, ok, err = parse.All(
@@ -63,23 +60,17 @@ func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error)
 		return r, false, nil
 	}
 
-	// Skip the `{{ ` to be able to parse with our already working expression parser
-	if _, _, err = parse.All(parse.String("{{"), parse.OptionalWhitespace).Parse(pi); err != nil {
-		pi.Seek(start)
-		return r, false, err
-	}
-
-	// Parse the Go `for` expression (everything until the closing `}}`).
 	if r.Expression, err = parseGo("for", pi, goexpression.For); err != nil {
 		return r, false, err
 	}
 
-	// Expect the closing `}}`, allowing for optional spaces before the closing.
-	if _, _, err = parse.All(parse.OptionalWhitespace, parse.String("}}")).Parse(pi); err != nil {
+	if _, ok, err = parse.All(parse.OptionalWhitespace, parse.String("}}")).Parse(pi); err != nil || !ok {
+		err = parse.Error(`for: expected closing "}}" but was not found`, pi.Position())
 		return r, false, err
 	}
 
 	// Parse the body of the `for` loop (everything until `{{ end }}`).
+	// There may be other gotempl statements in between.
 	tnp := newTemplateNodeParser(parse.String("{{ end }}"), "for expression closing brace")
 	var nodes Nodes
 	if nodes, ok, err = tnp.Parse(pi); err != nil || !ok {
@@ -88,14 +79,7 @@ func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error)
 	}
 	r.Children = nodes.Nodes
 
-	if _, ok, err = parse.All(
-		parse.OptionalWhitespace,
-		parse.String("{{"),
-		parse.OptionalWhitespace,
-		parse.String("end"),
-		parse.OptionalWhitespace,
-		parse.String("}}"),
-	).Parse(pi); err != nil || !ok {
+	if _, ok, err = goTemplExpressionEnd.Parse(pi); err != nil || !ok {
 		err = parse.Error("for: missing `{{ end }}`", pi.Position())
 		return
 	}

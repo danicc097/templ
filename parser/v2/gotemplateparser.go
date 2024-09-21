@@ -161,6 +161,16 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	return t, true, nil
 })
 
+// {{ end }}
+var goTemplExpressionEnd = parse.All(
+	parse.OptionalWhitespace,
+	parse.String("{{"),
+	parse.OptionalWhitespace,
+	parse.String("end"),
+	parse.OptionalWhitespace,
+	parse.String("}}"),
+)
+
 var gotemplateNodeParsers = []parse.Parser[Node]{
 	// goComment, part of output in gotempl
 	// goifExpression,           // TODO:
