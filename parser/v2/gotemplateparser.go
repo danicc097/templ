@@ -129,7 +129,7 @@ var goTemplOrNewLine = parse.Any(parse.String("{{"), parse.String(("}}")), parse
 var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	from := pi.Position()
 
-	// Read until a templ expression opens.
+	// Read until a templ expression opens or line ends.
 	var t Text
 	if t.Value, ok, err = parse.StringUntil(goTemplOrNewLine).Parse(pi); err != nil || !ok {
 		return
