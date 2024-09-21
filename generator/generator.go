@@ -101,6 +101,7 @@ type generator struct {
 	fileName string
 	// skipCodeGeneratedComment skips the code generated comment at the top of the file.
 	skipCodeGeneratedComment bool
+	unescapeStrings          bool
 }
 
 func (g *generator) generate() (err error) {
@@ -219,9 +220,11 @@ func (g *generator) writeTemplateNodes() error {
 				return err
 			}
 		case parser.GoTemplate:
+			g.unescapeStrings = true
 			if err := g.writeGoTemplate(i, n); err != nil {
 				return err
 			}
+			g.unescapeStrings = false
 		default:
 			return fmt.Errorf("unknown node type: %v", reflect.TypeOf(n))
 		}
@@ -1504,7 +1507,11 @@ func (g *generator) writeStringExpression(indentLevel int, e parser.Expression) 
 	}
 
 	// _, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(vn)
-	if _, err = g.w.WriteIndent(indentLevel, "_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString("+vn+"))\n"); err != nil {
+	s := "templ.EscapeString(" + vn + ")"
+	if g.unescapeStrings {
+		s = vn
+	}
+	if _, err = g.w.WriteIndent(indentLevel, "_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("+s+")\n"); err != nil {
 		return err
 	}
 	if err = g.writeErrorHandler(indentLevel); err != nil {
