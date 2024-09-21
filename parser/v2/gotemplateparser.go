@@ -176,6 +176,9 @@ var gotemplateNodeParsers = []parse.Parser[Node]{
 	// goifExpression,           // TODO:
 	goForExpression, // {{for ...}}...{{end}}
 	// goswitchExpression,       // maybe not worth it
+	// FIXME: possibly all { ... } expressions collide when we write literal for, func, etc.
+	// and parser fails with `expected declaration, found '}'`. instead they should seek start pos
+	// when they fail.
 	callTemplateExpression, // {! TemplateName(a, b, c) }
 	templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	childrenExpression,     // { children... }

@@ -25,6 +25,8 @@ gotempl Package() {
 	// A comment that should be rendered
 	/* Another comment that should be rendered
 	*/
+	{{ /* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */ }}
+	{{ /* TODO: dont render extra spaces in new lines */ }}
 	{{ /* this should not be printed */ }}
 	{{/* this should not be printed */
 y := "y"
@@ -35,7 +37,7 @@ y := "y"
 		{ fmt.Sprintf("// %s-%d-%d-%s",ab(), i, first, y) }
 	{{ end }}
 	const z = "z"
-	for i := 0; i < 3; i++ { println("z") }
+	// for i := 0; i < 3; i++ { println("z") }
 	// FIXME: for not being parsed as plain text
 	// for i := 0; i < 3; i++ {
 	//   println("z")

@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
+	goformat "go/format"
 	"testing"
+
+	"mvdan.cc/gofumpt/format"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -16,8 +19,20 @@ func Test(t *testing.T) {
 	component := TestComponent()
 	buf := bytes.Buffer{}
 	component.Render(context.Background(), &buf)
-	// TODO: use gofmt printer on both and cmp diff
-	if diff := cmp.Diff(buf.String(), expected); diff != "" {
+	src, err := goformat.Source(buf.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	srcFormatted, err := format.Source(src, format.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedFormatted, err := format.Source([]byte(expected), format.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(string(srcFormatted), string(expectedFormatted)); diff != "" {
 		t.Error(diff)
 	}
 }

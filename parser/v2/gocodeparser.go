@@ -23,8 +23,7 @@ var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 		return GoCode{}, false, ErrSingleLineCommentInGotempl
 	}
 	var r GoCode
-	var pi2 *parse.Input
-	pi2 = parse.NewInput(src)
+	pi2 := parse.NewInput(src)
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)
 	commentStartPos := pi2.Position()
 	_, _, _ = goTemplComment.Parse(pi2)

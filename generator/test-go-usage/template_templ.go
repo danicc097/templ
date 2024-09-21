@@ -45,10 +45,12 @@ func Package() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("/* Package testgousage. */ package testgousage // A comment that should be rendered /* Another comment that should be rendered */")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("/*\n Package testgousage.\n */\n package testgousage\n // A comment that should be rendered\n /* Another comment that should be rendered\n */\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		/* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */
+		/* TODO: dont render extra spaces in new lines */
 		/* this should not be printed */
 		/* this should not be printed */
 		y := "y"
@@ -58,9 +60,9 @@ func Package() templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 35, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 37, Col: 51}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2 + "\n")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -69,7 +71,7 @@ func Package() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("const z = \"z\" for i := 0; i < 3; i++ { println(\"z\") } // FIXME: for not being parsed as plain text // for i := 0; i < 3; i++ { //   println(\"z\") // }")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("const z = \"z\"\n // for i := 0; i < 3; i++ { println(\"z\") }\n // FIXME: for not being parsed as plain text\n // for i := 0; i < 3; i++ {\n //   println(\"z\")\n // }\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
