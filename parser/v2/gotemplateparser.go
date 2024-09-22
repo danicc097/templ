@@ -120,16 +120,27 @@ type gotemplateNodeParser[TUntil any] struct {
 	untilName string
 }
 
-var gotemplateNodeSkipParsers = []parse.Parser[Node]{
-	// TODO: skip {{ // and /* }} - gotempl comments
-}
+var gotemplateNodeSkipParsers = []parse.Parser[Node]{}
 
 var goTemplOrNewLine = parse.Any(parse.String("{{"), parse.String(("}}")), parse.String("\r\n"), parse.Rune('\n'))
 
 var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	from := pi.Position()
+	to, _ := pi.Peek(-1)
+	fmt.Printf("gotextParser : %v\n", to)
 
 	// Read until a templ expression opens or line ends.
+
+	// TODO: expressions then can't be { ... } since fmt expressions can match go code text.
+	// {{}} may be used for inline exp as well. if contents dont return string or (string, error)
+	// then the next parser is tried. {{}} maybe match go templates in go text but wont be
+	// matched as expression.
+	// FIXME gotextParser: finding a line that starts with } should be go text,
+	// until we parse a "\n\s*{{", "\n}\n\n" or "\n}\nEOF", or "((" for expression
+	// start which can be found inline.
+	// if the % % or {{}} expression parser fails, then it defaults to goTextParser
+	// again so there shouldnt be issues misinterpreting go text as gotempl exp
+	// alternative:  parse go expressions individually the same way as html elements - much more troublesome.
 	var t Text
 	if t.Value, ok, err = parse.StringUntil(goTemplOrNewLine).Parse(pi); err != nil || !ok {
 		return
@@ -176,9 +187,6 @@ var gotemplateNodeParsers = []parse.Parser[Node]{
 	// goifExpression,           // TODO:
 	goForExpression, // {{for ...}}...{{end}}
 	// goswitchExpression,       // maybe not worth it
-	// FIXME: possibly all { ... } expressions collide when we write literal for, func, etc.
-	// and parser fails with `expected declaration, found '}'`. instead they should seek start pos
-	// when they fail.
 	callTemplateExpression, // {! TemplateName(a, b, c) }
 	templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	childrenExpression,     // { children... }
@@ -199,6 +207,7 @@ outer:
 				return
 			}
 			if ok {
+				// end reached for a gotempl ...(...) {}
 				pi.Seek(start)
 				return op, true, nil
 			}
