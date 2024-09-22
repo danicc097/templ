@@ -54,6 +54,14 @@ var (
 	dblCloseParensWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseParens)
 )
 
+// %{ ... }% allows us to reuse most of the existing string expression parser logic
+var (
+	closeGotemplStringExpr                    = parse.String("}%")
+	openGotemplStringExpr                     = parse.String("%{")
+	closeGotemplStringExprWithOptionalPadding = parse.StringFrom(optionalSpaces, closeGotemplStringExpr)
+	openGotemplStringExprWithOptionalPadding  = parse.StringFrom(openGotemplStringExpr, optionalSpaces)
+)
+
 var (
 	openParens  = parse.String("(")
 	closeParens = parse.String(")")

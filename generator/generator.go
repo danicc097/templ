@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -665,12 +666,17 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 	case parser.SwitchExpression:
 		err = g.writeSwitchExpression(indentLevel, n, next)
 	case parser.StringExpression:
+		// FIXME: test｜ parser.Text: %
+		// 				test｜ parser.StringExpression: {fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y)
+		// 				test｜ parser.Text: %
+		fmt.Fprintf(os.Stderr, "parser.StringExpression: %v\n", n.Expression.Value)
 		err = g.writeStringExpression(indentLevel, n.Expression)
 	case parser.GoCode:
 		err = g.writeGoCode(indentLevel, n.Expression)
 	case parser.Whitespace:
 		err = g.writeWhitespace(indentLevel, n)
 	case parser.Text:
+		fmt.Fprintf(os.Stderr, "parser.Text: %v\n", n.Value)
 		err = g.writeText(indentLevel, n)
 	case parser.GoComment:
 		// Do not render Go comments in the output HTML.
@@ -1544,6 +1550,7 @@ func (g *generator) writeText(indentLevel int, n parser.Text) (err error) {
 	if g.gotemplMode {
 		s = s + `\n`
 	}
+	// fmt.Fprintf(os.Stderr, "s: %v\n", s)
 	_, err = g.w.WriteStringLiteral(indentLevel, s)
 	return err
 }

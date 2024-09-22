@@ -8,11 +8,32 @@ import (
 )
 
 func TestStringExpressionParser(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name     string
 		input    string
 		expected StringExpression
 	}{
+		{
+			name:  "basic expression",
+			input: `{ fmt.Sprintf("%s", "this") }`,
+			expected: StringExpression{
+				Expression: Expression{
+					Value: `fmt.Sprintf("%s", "this")`,
+					Range: Range{
+						From: Position{
+							Index: 2,
+							Line:  0,
+							Col:   2,
+						},
+						To: Position{
+							Index: 27,
+							Line:  0,
+							Col:   27,
+						},
+					},
+				},
+			},
+		},
 		{
 			name:  "basic expression",
 			input: `{ "this" }`,
@@ -26,7 +47,6 @@ func TestStringExpressionParser(t *testing.T) {
 							Col:   2,
 						},
 						To: Position{
-
 							Index: 8,
 							Line:  0,
 							Col:   8,
@@ -48,7 +68,6 @@ func TestStringExpressionParser(t *testing.T) {
 							Col:   1,
 						},
 						To: Position{
-
 							Index: 7,
 							Line:  0,
 							Col:   7,
@@ -72,7 +91,6 @@ func TestStringExpressionParser(t *testing.T) {
 							Col:   2,
 						},
 						To: Position{
-
 							Index: 27,
 							Line:  2,
 							Col:   5,

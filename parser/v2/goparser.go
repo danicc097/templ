@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/a-h/parse"
@@ -35,6 +36,11 @@ func parseCSSFuncDecl(pi *parse.Input) (name string, expression Expression, err 
 }
 
 func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, err error) {
+	// FIXME: currently { ... } is matched instead of %{ ... }% so closingChars are always the default "}"
+	// and we get 2 extraneous % Text nodes.
+	if closingChars == "%}" {
+		pi.Take(1) // consume the start %
+	}
 	from := pi.Position()
 	src, _ := pi.Peek(-1)
 	expr, err := goexpression.SliceArgs(src, closingChars)
@@ -42,7 +48,11 @@ func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, err e
 		return r, err
 	}
 	pi.Take(len(expr))
+	if closingChars == "%}" {
+		pi.Take(1) // consume the end %
+	}
 	to := pi.Position()
+	fmt.Fprintf(os.Stderr, "expr: %v\n", expr)
 	return NewExpression(expr, from, to), nil
 }
 

@@ -14,8 +14,29 @@ func TestGoStringExpressionParser(t *testing.T) {
 		expected StringExpression
 	}{
 		{
-			name:  "basic expression",
-			input: `(( "this" ))`,
+			name:  "basic expression 1",
+			input: `%{ fmt.Sprintf("%s", "this") }%`,
+			expected: StringExpression{
+				Expression: Expression{
+					Value: `fmt.Sprintf("%s", "this")`,
+					Range: Range{
+						From: Position{
+							Index: 3,
+							Line:  0,
+							Col:   3,
+						},
+						To: Position{
+							Index: 28,
+							Line:  0,
+							Col:   28,
+						},
+					},
+				},
+			},
+		},
+		{
+			name:  "basic expression 2",
+			input: `%{ "this" }%`,
 			expected: StringExpression{
 				Expression: Expression{
 					Value: `"this"`,
@@ -36,7 +57,7 @@ func TestGoStringExpressionParser(t *testing.T) {
 		},
 		{
 			name:  "no spaces",
-			input: `(("this"))`,
+			input: `%{"this"}%`,
 			expected: StringExpression{
 				Expression: Expression{
 					Value: `"this"`,
@@ -57,9 +78,9 @@ func TestGoStringExpressionParser(t *testing.T) {
 		},
 		{
 			name: "multiple lines",
-			input: `(( test{}.Call(a,
+			input: `%{ test{}.Call(a,
 		b,
-	  c) ))`,
+	  c) }%`,
 			expected: StringExpression{
 				Expression: Expression{
 					Value: "test{}.Call(a,\n\t\tb,\n\t  c)",
