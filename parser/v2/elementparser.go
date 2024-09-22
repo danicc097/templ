@@ -251,7 +251,7 @@ var expressionAttributeParser = parse.Func(func(pi *parse.Input) (attr Expressio
 	}
 
 	// Expression.
-	if attr.Expression, err = parseGoSliceArgs(pi); err != nil {
+	if attr.Expression, err = parseGoSliceArgs(pi, "}"); err != nil {
 		return attr, false, err
 	}
 

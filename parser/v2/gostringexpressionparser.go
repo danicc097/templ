@@ -1,27 +1,30 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/a-h/parse"
 )
 
-var stringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
+var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	// Check the prefix first.
-	if _, ok, err = parse.Or(parse.String("{ "), parse.String("{")).Parse(pi); err != nil || !ok {
+	if _, ok, err = parse.Or(parse.String("(( "), parse.String("((")).Parse(pi); err != nil || !ok {
 		return
 	}
 
 	// Once we have a prefix, we must have an expression that returns a string, with optional err.
 	var r StringExpression
-	if r.Expression, err = parseGoSliceArgs(pi, "}"); err != nil {
+	if r.Expression, err = parseGoSliceArgs(pi, "))"); err != nil {
 		return r, false, err
 	}
+	fmt.Printf("r.Expression.Value: %v\n", r.Expression.Value)
 
 	// Clear any optional whitespace.
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)
 
 	// }
-	if _, ok, err = closeBraceWithOptionalPadding.Parse(pi); err != nil || !ok {
-		err = parse.Error("string expression: missing close brace", pi.Position())
+	if _, ok, err = dblCloseParensWithOptionalPadding.Parse(pi); err != nil || !ok {
+		err = parse.Error("gostring expression: missing close braces", pi.Position())
 		return
 	}
 

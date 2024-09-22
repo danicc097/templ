@@ -126,8 +126,8 @@ var goTemplOrNewLine = parse.Any(parse.String("{{"), parse.String(("}}")), parse
 
 var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	from := pi.Position()
-	to, _ := pi.Peek(-1)
-	fmt.Printf("gotextParser : %v\n", to)
+	// to, _ := pi.Peek(-1)
+	// fmt.Printf("gotextParser : %v\n", to)
 
 	// Read until a templ expression opens or line ends.
 
@@ -191,8 +191,8 @@ var gotemplateNodeParsers = []parse.Parser[Node]{
 	templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	childrenExpression,     // { children... }
 	goCode,                 // {{ myval := x.myval }}
-	stringExpression,       // { "abc" }
 	whitespaceExpression,   // { " " }
+	gostringExpression,     // (( "abc" )), (( fmt.Sprintf("abc") ))
 	gotextParser,           // match anything, assume they're valid go code fragments
 }
 

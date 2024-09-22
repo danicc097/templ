@@ -26,31 +26,49 @@ func ExpressionOf(p parse.Parser[string]) parse.Parser[Expression] {
 	})
 }
 
-var lt = parse.Rune('<')
-var gt = parse.Rune('>')
-var openBrace = parse.String("{")
-var optionalSpaces = parse.StringFrom(parse.Optional(
-	parse.AtLeast(1, parse.Rune(' '))))
+var (
+	lt             = parse.Rune('<')
+	gt             = parse.Rune('>')
+	openBrace      = parse.String("{")
+	optionalSpaces = parse.StringFrom(parse.Optional(
+		parse.AtLeast(1, parse.Rune(' '))))
+)
+
 var openBraceWithPadding = parse.StringFrom(optionalSpaces,
 	openBrace,
 	optionalSpaces)
 var openBraceWithOptionalPadding = parse.Any(openBraceWithPadding, openBrace)
 
-var closeBrace = parse.String("}")
-var closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
+var (
+	closeBrace                    = parse.String("}")
+	closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
+)
 
-var dblCloseBrace = parse.String("}}")
-var dblCloseBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseBrace)
+var (
+	dblCloseBrace                    = parse.String("}}")
+	dblCloseBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseBrace)
+)
 
-var openBracket = parse.String("(")
-var closeBracket = parse.String(")")
+var (
+	dblCloseParens                    = parse.String("))")
+	dblCloseParensWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseParens)
+)
 
-var stringUntilNewLine = parse.StringUntil[string](parse.NewLine)
-var newLineOrEOF = parse.Or(parse.NewLine, parse.EOF[string]())
-var stringUntilNewLineOrEOF = parse.StringUntil(newLineOrEOF)
+var (
+	openParens  = parse.String("(")
+	closeParens = parse.String(")")
+)
 
-var jsOrGoSingleLineComment = parse.StringFrom(parse.String("//"), parse.StringUntil(parse.Any(parse.NewLine, parse.EOF[string]())))
-var jsOrGoMultiLineComment = parse.StringFrom(parse.String("/*"), parse.StringUntil(parse.String("*/")))
+var (
+	stringUntilNewLine      = parse.StringUntil[string](parse.NewLine)
+	newLineOrEOF            = parse.Or(parse.NewLine, parse.EOF[string]())
+	stringUntilNewLineOrEOF = parse.StringUntil(newLineOrEOF)
+)
+
+var (
+	jsOrGoSingleLineComment = parse.StringFrom(parse.String("//"), parse.StringUntil(parse.Any(parse.NewLine, parse.EOF[string]())))
+	jsOrGoMultiLineComment  = parse.StringFrom(parse.String("/*"), parse.StringUntil(parse.String("*/")))
+)
 
 var exp = expressionParser{
 	startBraceCount: 1,
@@ -153,8 +171,10 @@ loop:
 
 // Letters and digits
 
-var octal_digit = parse.RuneIn("01234567")
-var hex_digit = parse.RuneIn("0123456789ABCDEFabcdef")
+var (
+	octal_digit = parse.RuneIn("01234567")
+	hex_digit   = parse.RuneIn("0123456789ABCDEFabcdef")
+)
 
 // https://go.dev/ref/spec#Rune_literals
 

@@ -194,9 +194,13 @@ loop:
 	return start, end, nil
 }
 
-func SliceArgs(content string) (expr string, err error) {
+func SliceArgs(content string, closingChars string) (expr string, err error) {
+	c := content
+	if closingChars != "}" {
+		c = strings.TrimSuffix(c, closingChars) + "}"
+	}
 	prefix := "package main\nvar templ_args = []any{"
-	src := prefix + content + "}"
+	src := prefix + c + "}"
 
 	node, parseErr := parser.ParseFile(token.NewFileSet(), "", src, parser.AllErrors)
 	if node == nil {
