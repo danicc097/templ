@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/a-h/parse"
 )
 
@@ -17,7 +15,7 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 	if r.Expression, err = parseGoSliceArgs(pi, "))"); err != nil {
 		return r, false, err
 	}
-	fmt.Printf("r.Expression.Value: %v\n", r.Expression.Value)
+	// fmt.Printf("r.Expression.Value: %v\n", r.Expression.Value)
 
 	// Clear any optional whitespace.
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)

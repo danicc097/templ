@@ -111,22 +111,34 @@ func TestGoCodeParser(t *testing.T) {
 				Multiline:     true,
 			},
 		},
-		// FIXME: should not error out
 		{
-			name:  "comments in expression 2",
+			name:  "line comments in expression 1",
 			input: `{{ // Comment only }}`,
-			// expected: GoCode{
-			// 	Expression: Expression{
-			// 		Value: "// Comment only",
-			// 		Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
-			// 	},
-			// 	TrailingSpace: SpaceNone,
-			// 	Multiline:     false,
-			// },
+			expected: GoCode{
+				Expression: Expression{
+					Value: "// Comment only",
+					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
+				},
+				TrailingSpace: SpaceNone,
+				Multiline:     false,
+			},
 			errContains: ErrSingleLineCommentInGotempl.Error(),
 		},
 		{
-			name:  "comments in expression 3",
+			name:  "line comments in expression 2",
+			input: `{{ // Comment only }}`,
+			expected: GoCode{
+				Expression: Expression{
+					Value: "// Comment only",
+					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
+				},
+				TrailingSpace: SpaceNone,
+				Multiline:     false,
+			},
+			errContains: ErrSingleLineCommentInGotempl.Error(),
+		},
+		{
+			name:  "block comments in expression 1",
 			input: `{{ /* Comment only */ }}`,
 			expected: GoCode{
 				Expression: Expression{
@@ -135,6 +147,20 @@ func TestGoCodeParser(t *testing.T) {
 				},
 				TrailingSpace: SpaceNone,
 				Multiline:     false,
+			},
+		},
+		{
+			name: "block comments in expression 1",
+			input: `{{ /* Comment only
+				*/ }}`,
+			expected: GoCode{
+				Expression: Expression{
+					Value: `/* Comment only
+				*/`,
+					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 25, Line: 1, Col: 6}},
+				},
+				TrailingSpace: SpaceNone,
+				Multiline:     true,
 			},
 		},
 	}

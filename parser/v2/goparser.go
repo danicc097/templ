@@ -37,7 +37,6 @@ func parseCSSFuncDecl(pi *parse.Input) (name string, expression Expression, err 
 func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, err error) {
 	from := pi.Position()
 	src, _ := pi.Peek(-1)
-	fmt.Printf("parseGoSliceArgs src: %v\n", src)
 	expr, err := goexpression.SliceArgs(src, closingChars)
 	if err != nil {
 		return r, err
