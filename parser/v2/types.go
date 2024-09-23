@@ -110,8 +110,9 @@ type Range struct {
 
 // Expression containing Go code.
 type Expression struct {
-	Value string
-	Range Range
+	Value   string
+	Range   Range
+	GoTempl bool
 }
 
 type TemplateFile struct {
@@ -434,6 +435,7 @@ type Text struct {
 	Value string
 	// TrailingSpace lists what happens after the text.
 	TrailingSpace TrailingSpace
+	GoTempl       bool
 }
 
 func (t Text) Trailing() TrailingSpace {

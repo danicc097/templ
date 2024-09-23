@@ -32,13 +32,14 @@ gotempl Package() {
 y := "y"
 /**/
 	}}
-	// FIXME: comment with % { "var" } % writes with newlines
-	%{ "// a" }%
+	// comment with %{ "var" }% with space
+	// comment with%{ "var" }%without space
+	%{ "const _ab = " }%"ab"
 	{{ first := items[0] }}
 	 {{ for _, i := range items }}
-		%{ fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y) }%
+		%{ fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y) }%
 		 {{ for _, j := range items }}
-			%{ fmt.Sprintf("// nested %d", j) }%
+			%{ fmt.Sprintf("// nested %d\n", j) }%
 		{{ end }}
 	{{ end }}
 	const z = "z"

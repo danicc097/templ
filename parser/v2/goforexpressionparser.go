@@ -63,6 +63,7 @@ func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error)
 	if r.Expression, err = parseGo("for", pi, goexpression.For); err != nil {
 		return r, false, err
 	}
+	r.Expression.GoTempl = true
 
 	if _, ok, err = parse.All(parse.OptionalWhitespace, parse.String("}}")).Parse(pi); err != nil || !ok {
 		err = parse.Error(`for: expected closing "}}" but was not found`, pi.Position())

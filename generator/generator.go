@@ -101,7 +101,6 @@ type generator struct {
 	fileName string
 	// skipCodeGeneratedComment skips the code generated comment at the top of the file.
 	skipCodeGeneratedComment bool
-	gotemplMode              bool
 }
 
 func (g *generator) generate() (err error) {
@@ -220,11 +219,9 @@ func (g *generator) writeTemplateNodes() error {
 				return err
 			}
 		case parser.GoTemplate:
-			g.gotemplMode = true
 			if err := g.writeGoTemplate(i, n); err != nil {
 				return err
 			}
-			g.gotemplMode = false
 		default:
 			return fmt.Errorf("unknown node type: %v", reflect.TypeOf(n))
 		}
@@ -383,11 +380,6 @@ func (g *generator) writeTemplBuffer(indentLevel int) (err error) {
 }
 
 func (g *generator) writeGoTemplate(nodeIdx int, t parser.GoTemplate) error {
-	// FIXME: should not write extra ` ` nodes in new lines
-	// for _, c := range t.Children {
-	// 	if g.gotemplMode {
-	// 	}
-	// }
 	var r parser.Range
 	var err error
 	var indentLevel int
@@ -694,10 +686,6 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 		}
 	}
 
-	// if g.gotemplMode {
-	// 	// always add newline in gotempl mode. gofmt will take care of it later if necessary
-	// 	_, err = g.w.Write("\n")
-	// }
 	return
 }
 
@@ -1517,8 +1505,8 @@ func (g *generator) writeStringExpression(indentLevel int, e parser.Expression) 
 
 	// _, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(vn)
 	s := "templ.EscapeString(" + vn + ")"
-	if g.gotemplMode {
-		s = vn + `+"\n"`
+	if e.GoTempl {
+		s = vn
 	}
 	if _, err = g.w.WriteIndent(indentLevel, "_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("+s+")\n"); err != nil {
 		return err
@@ -1543,7 +1531,7 @@ func (g *generator) writeWhitespace(indentLevel int, n parser.Whitespace) (err e
 func (g *generator) writeText(indentLevel int, n parser.Text) (err error) {
 	quoted := strconv.Quote(n.Value)
 	s := quoted[1 : len(quoted)-1]
-	if g.gotemplMode {
+	if n.GoTempl && n.TrailingSpace == parser.SpaceVertical {
 		s = s + `\n`
 	}
 	// fmt.Fprintf(os.Stderr, "s: %v\n", s)

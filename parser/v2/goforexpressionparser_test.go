@@ -20,7 +20,8 @@ func TestForExpressionParser_Go(t *testing.T) {
 				{{ end }}`,
 			expected: GoForExpression{
 				Expression: Expression{
-					Value: `_, item := range p.Items`,
+					GoTempl: true,
+					Value:   `_, item := range p.Items`,
 					Range: Range{
 						From: Position{
 							Index: 7,
@@ -38,11 +39,12 @@ func TestForExpressionParser_Go(t *testing.T) {
 					Whitespace{Value: "\n\t\t\t\t\t"},
 					StringExpression{
 						Gotempl: true,
-
-						Expression: Expression{Value: "item", Range: Range{
-							From: Position{Index: 43, Line: 1, Col: 8},
-							To:   Position{Index: 47, Line: 1, Col: 12},
-						}},
+						Expression: Expression{
+							GoTempl: true, Value: "item", Range: Range{
+								From: Position{Index: 43, Line: 1, Col: 8},
+								To:   Position{Index: 47, Line: 1, Col: 12},
+							},
+						},
 						TrailingSpace: SpaceVertical,
 					},
 				},
@@ -53,7 +55,8 @@ func TestForExpressionParser_Go(t *testing.T) {
 			input: `{{ for _, item := range p.Items }}%{item}%{{ end }}`,
 			expected: GoForExpression{
 				Expression: Expression{
-					Value: "_, item := range p.Items",
+					GoTempl: true,
+					Value:   "_, item := range p.Items",
 					Range: Range{
 						From: Position{
 							Index: 7,
@@ -69,10 +72,12 @@ func TestForExpressionParser_Go(t *testing.T) {
 				}, Children: []Node{
 					StringExpression{
 						Gotempl: true,
-						Expression: Expression{Value: "item", Range: Range{
-							From: Position{Index: 36, Line: 0, Col: 36},
-							To:   Position{Index: 40, Line: 0, Col: 40},
-						}},
+						Expression: Expression{
+							GoTempl: true, Value: "item", Range: Range{
+								From: Position{Index: 36, Line: 0, Col: 36},
+								To:   Position{Index: 40, Line: 0, Col: 40},
+							},
+						},
 					},
 				},
 			},

@@ -19,7 +19,8 @@ func TestGoStringExpressionParser(t *testing.T) {
 			expected: StringExpression{
 				Gotempl: true,
 				Expression: Expression{
-					Value: `fmt.Sprintf("%s", "this")`,
+					GoTempl: true,
+					Value:   `fmt.Sprintf("%s", "this")`,
 					Range: Range{
 						From: Position{
 							Index: 3,
@@ -41,7 +42,8 @@ func TestGoStringExpressionParser(t *testing.T) {
 			expected: StringExpression{
 				Gotempl: true,
 				Expression: Expression{
-					Value: `"this"`,
+					GoTempl: true,
+					Value:   `"this"`,
 					Range: Range{
 						From: Position{
 							Index: 3,
@@ -63,7 +65,8 @@ func TestGoStringExpressionParser(t *testing.T) {
 			expected: StringExpression{
 				Gotempl: true,
 				Expression: Expression{
-					Value: `"this"`,
+					GoTempl: true,
+					Value:   `"this"`,
 					Range: Range{
 						From: Position{
 							Index: 2,
@@ -87,7 +90,8 @@ func TestGoStringExpressionParser(t *testing.T) {
 			expected: StringExpression{
 				Gotempl: true,
 				Expression: Expression{
-					Value: "test{}.Call(a,\n\t\tb,\n\t  c)",
+					GoTempl: true,
+					Value:   "test{}.Call(a,\n\t\tb,\n\t  c)",
 					Range: Range{
 						From: Position{
 							Index: 3,

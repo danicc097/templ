@@ -6,8 +6,10 @@ package testgousage
 // A comment that should be rendered
 /* Another comment that should be rendered
  */
-// FIXME: comment with % { "var" } % writes with newlines
-// a
+// comment with var with space
+// comment withvarwithout space
+const _ab = "ab"
+
 // "ab"-1-1-y
 // nested 1
 // nested 2

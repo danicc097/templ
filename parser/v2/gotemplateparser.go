@@ -137,12 +137,12 @@ var gotemplateNodeParsers = [...]parse.Parser[Node]{
 	// goifExpression,           // TODO:
 	goForExpression, // {{for ...}}...{{end}}
 	// goswitchExpression,       // maybe not worth it
+	gostringExpression,     // %{ "abc" }%, %{ fmt.Sprintf("abc") }%
 	callTemplateExpression, // {! TemplateName(a, b, c) }
 	templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	childrenExpression,     // { children... }
 	goCode,                 // {{ myval := x.myval }}
 	whitespaceExpression,   // { " " }
-	gostringExpression,     // %{ "abc" }%, %{ fmt.Sprintf("abc") }%
 	gotextParser,           // match anything, assume they're valid go code fragments
 }
 

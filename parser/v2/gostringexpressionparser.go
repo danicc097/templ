@@ -19,6 +19,7 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 		pi.Seek(start) // not an expression that returns a string, might be just text.
 		return r, false, err
 	}
+	r.Expression.GoTempl = true
 
 	// Clear any optional whitespace.
 	_, _, _ = parse.OptionalWhitespace.Parse(pi)

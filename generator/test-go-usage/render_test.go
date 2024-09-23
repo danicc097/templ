@@ -19,6 +19,7 @@ func Test(t *testing.T) {
 	component := TestComponent()
 	buf := bytes.Buffer{}
 	component.Render(context.Background(), &buf)
+	t.Logf("----got------\n%v\n----------\n", buf.String())
 	src, err := goformat.Source(buf.Bytes())
 	if err != nil {
 		t.Fatal(err)

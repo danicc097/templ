@@ -19,7 +19,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	// if the %{}% or {{}} expression parser fails, then it defaults to goTextParser
 	// again so there shouldnt be issues misinterpreting go text as gotempl exp
 	// alternative:  parse go expressions individually the same way as html elements - much more troublesome.
-	var t Text
+	t := Text{GoTempl: true}
 	if t.Value, ok, err = parse.StringUntil(goTemplOrNewLine).Parse(pi); err != nil || !ok {
 		return
 	}
