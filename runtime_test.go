@@ -51,10 +51,10 @@ func TestCSSHandler(t *testing.T) {
 			h := templ.NewCSSHandler(tt.input...)
 			h.ServeHTTP(w, &http.Request{})
 			if diff := cmp.Diff(tt.expectedMIMEType, w.Header().Get("Content-Type")); diff != "" {
-				t.Errorf(diff)
+				t.Errorf("header mismatch (-want +got):\n%s", diff)
 			}
 			if diff := cmp.Diff(tt.expectedBody, w.Body.String()); diff != "" {
-				t.Errorf(diff)
+				t.Errorf("body mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

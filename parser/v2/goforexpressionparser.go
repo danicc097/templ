@@ -71,7 +71,7 @@ func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error)
 
 	// Parse the body of the `for` loop (everything until `{{ end }}`).
 	// There may be other gotempl statements in between.
-	tnp := newTemplateNodeParser(parse.String("{{ end }}"), "for expression closing brace")
+	tnp := newGoTemplateNodeParser(goTemplExpressionEnd, "for expression closing {{end}}")
 	var nodes Nodes
 	if nodes, ok, err = tnp.Parse(pi); err != nil || !ok {
 		err = parse.Error("for: expected nodes, but none were found", pi.Position())

@@ -32,7 +32,7 @@ func Test(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(string(srcFormatted), string(expectedFormatted)); diff != "" {
-		t.Error(diff)
+	if diff := cmp.Diff(string(expectedFormatted), string(srcFormatted)); diff != "" {
+		t.Errorf(" mismatch (-want +got):\n%s", diff)
 	}
 }

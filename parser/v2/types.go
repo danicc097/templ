@@ -1174,6 +1174,7 @@ type StringExpression struct {
 	Expression Expression
 	// TrailingSpace lists what happens after the expression.
 	TrailingSpace TrailingSpace
+	Gotempl       bool
 }
 
 func (se StringExpression) Trailing() TrailingSpace {
@@ -1185,6 +1186,9 @@ func (se StringExpression) IsStyleDeclarationValue() bool { return true }
 func (se StringExpression) Write(w io.Writer, indent int) error {
 	if isWhitespace(se.Expression.Value) {
 		se.Expression.Value = ""
+	}
+	if se.Gotempl {
+		return writeIndent(w, indent, `%{ `, se.Expression.Value, ` }%`)
 	}
 	return writeIndent(w, indent, `{ `, se.Expression.Value, ` }`)
 }

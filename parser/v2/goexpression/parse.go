@@ -7,7 +7,6 @@ import (
 	"go/parser"
 	"go/scanner"
 	"go/token"
-	"os"
 	"regexp"
 	"strings"
 	"unicode"
@@ -199,7 +198,6 @@ func SliceArgs(content string, closingChars string) (expr string, err error) {
 	c := content
 	if closingChars != "}" {
 		c = strings.TrimSuffix(c, closingChars) + "}"
-		fmt.Fprintf(os.Stderr, "(%s) expr: %v\n", closingChars, c)
 	}
 	prefix := "package main\nvar templ_args = []any{"
 	src := prefix + c + "}"

@@ -1,6 +1,8 @@
 package parser
 
-import "github.com/a-h/parse"
+import (
+	"github.com/a-h/parse"
+)
 
 var goTemplOrNewLine = parse.Any(parse.String("{{"), openGotemplStringExpr, parse.String("\r\n"), parse.Rune('\n'))
 
@@ -11,14 +13,10 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 
 	// Read until a templ expression opens or line ends.
 
-	// TODO: expressions then can't be { ... } since fmt expressions can match go code text.
-	// {{}} may be used for inline exp as well. if contents dont return string or (string, error)
-	// then the next parser is tried. {{}} maybe match go templates in go text but wont be
-	// matched as expression.
 	// FIXME gotextParser: finding a line that starts with } should be go text,
 	// until we parse a "\n}\n\n" or "\n}\nEOF", or "{{".
 	// start which can be found inline.
-	// if the % % or {{}} expression parser fails, then it defaults to goTextParser
+	// if the %{}% or {{}} expression parser fails, then it defaults to goTextParser
 	// again so there shouldnt be issues misinterpreting go text as gotempl exp
 	// alternative:  parse go expressions individually the same way as html elements - much more troublesome.
 	var t Text
