@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"io"
+	"os"
 	"strings"
 	"unicode"
 
@@ -230,6 +231,7 @@ func (ws Whitespace) IsNode() bool { return true }
 func (ws Whitespace) Write(w io.Writer, indent int) error {
 	if ws.GoTempl {
 		// dont remove whitespace in go templates
+		fmt.Fprintf(os.Stderr, "ws.Value: %v\n", ws.Value)
 		_, err := io.WriteString(w, ws.Value)
 		return err
 	}

@@ -29,7 +29,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 		return
 	}
 	if isWhitespace(t.Value) {
-		return t, false, nil
+		return Whitespace{GoTempl: true, Value: t.Value}, false, nil
 	}
 	if _, ok = pi.Peek(1); !ok {
 		err = parse.Error("gotextParser: unterminated text: expected templ expression open, or newline", from)
