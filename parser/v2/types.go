@@ -221,12 +221,18 @@ func (p Package) Write(w io.Writer, indent int) error {
 
 // Whitespace.
 type Whitespace struct {
-	Value string
+	Value   string
+	GoTempl bool
 }
 
 func (ws Whitespace) IsNode() bool { return true }
 
 func (ws Whitespace) Write(w io.Writer, indent int) error {
+	if ws.GoTempl {
+		// dont remove whitespace in go templates
+		_, err := io.WriteString(w, ws.Value)
+		return err
+	}
 	if ws.Value == "" || !strings.Contains(ws.Value, "\n") {
 		return nil
 	}
@@ -444,7 +450,7 @@ func (t Text) Trailing() TrailingSpace {
 
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
-	if t.GoTempl { // leave as is, will format output later when the complete go file is written. FIXME: left trailing space being removed
+	if t.GoTempl { // leave as is since we are not removing whitespace with gotempl.
 		_, err := io.WriteString(w, t.Value)
 		return err
 	}

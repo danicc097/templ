@@ -36,7 +36,7 @@ func TestForExpressionParser_Go(t *testing.T) {
 					},
 				},
 				Children: []Node{
-					Whitespace{Value: "\n\t\t\t\t\t"},
+					Whitespace{Value: "\n\t\t\t\t\t", GoTempl: true},
 					StringExpression{
 						Gotempl: true,
 						Expression: Expression{
