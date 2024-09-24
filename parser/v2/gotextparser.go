@@ -1,12 +1,17 @@
 package parser
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/a-h/parse"
 )
 
 var goTemplOrNewLine = parse.Any(parse.String("{{"), openGotemplStringExpr, parse.String("\r\n"), parse.Rune('\n'))
 
 var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
+	src, _ := pi.Peek(-1)
 	from := pi.Position()
 	// to, _ := pi.Peek(-1)
 	// fmt.Printf("gotextParser : %v\n", to)
@@ -36,9 +41,9 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	if _, _, err = voidElementCloser.Parse(pi); err != nil {
 		return
 	}
-
+	fmt.Fprintf(os.Stderr, "t.Value: %v\nsrc was: %v\n", t.Value, strings.Split(src, "\n")[0])
 	// Parse trailing whitespace.
-	wsStart := pi.Position()
+	wsStart := pi.Index()
 	ws, _, err := parse.Whitespace.Parse(pi)
 	if err != nil {
 		return t, false, err
@@ -47,7 +52,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	if err != nil {
 		return t, false, err
 	}
-	pi.Seek(wsStart.Index) // leave whitespace behind so next text node is spaced as is
+	pi.Seek(wsStart) // leave whitespace for the next parser so bare text spacing is not formatted by templ
 
 	return t, true, nil
 })
