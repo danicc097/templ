@@ -37,6 +37,7 @@ y := "y"
 	%{ "const _ab = " }%"ab"
 	{{ first := items[0] }}
 	 {{ for _, i := range items }}
+		{{ /* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */ }}
 		%{ fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y) }%
 		 {{ for _, j := range items }}
 			%{ fmt.Sprintf("// nested %d\n", j) }%
