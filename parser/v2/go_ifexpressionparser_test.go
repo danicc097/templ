@@ -16,57 +16,38 @@ func TestGoIfExpression(t *testing.T) {
 		{
 			name: "if: simple expression",
 			input: `{{ if p.Test }}
-<span>
-  %{ "span content" }%
-</span>
+  %{ "content" }%
 {{ end }}`,
 			expected: GoIfExpression{
 				Expression: Expression{
-					Value: `p.Test`,
+					GoTempl: true,
+					Value:   `p.Test`,
 					Range: Range{
 						From: Position{
-							Index: 4,
+							Index: 6,
 							Line:  0,
-							Col:   4,
+							Col:   6,
 						},
 						To: Position{
-							Index: 10,
+							Index: 12,
 							Line:  0,
-							Col:   10,
+							Col:   12,
 						},
 					},
 				},
 				Then: []Node{
-					Element{
-						Name: "span",
-						NameRange: Range{
-							From: Position{Index: 16, Line: 1, Col: 2},
-							To:   Position{Index: 20, Line: 1, Col: 6},
-						},
-
-						Children: []Node{
-							Whitespace{Value: "\n  "},
-							StringExpression{
-								Expression: Expression{
-									Value: `"span content"`,
-									Range: Range{
-										From: Position{
-											Index: 28,
-											Line:  2,
-											Col:   6,
-										},
-										To: Position{
-											Index: 42,
-											Line:  2,
-											Col:   20,
-										},
-									},
-								},
-								TrailingSpace: SpaceVertical,
+					Whitespace{Value: "\n  ", GoTempl: true},
+					StringExpression{
+						Expression: Expression{
+							Value: `"content"`,
+							Range: Range{
+								From: Position{Index: 21, Line: 1, Col: 5},
+								To:   Position{Index: 30, Line: 1, Col: 14},
 							},
+							GoTempl: true,
 						},
-						IndentChildren: true,
-						TrailingSpace:  SpaceVertical,
+						TrailingSpace: "\n",
+						Gotempl:       true,
 					},
 				},
 			},
@@ -80,59 +61,45 @@ func TestGoIfExpression(t *testing.T) {
 {{ end }}`,
 			expected: GoIfExpression{
 				Expression: Expression{
-					Value: `p.A`,
+					GoTempl: true,
+					Value:   `p.A`,
 					Range: Range{
 						From: Position{
-							Index: 4,
+							Index: 6,
 							Line:  0,
-							Col:   4,
+							Col:   6,
 						},
 						To: Position{
-							Index: 7,
+							Index: 9,
 							Line:  0,
-							Col:   7,
+							Col:   9,
 						},
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\t"},
-					StringExpression{
+					Whitespace{Value: "\n\t", GoTempl: true},
+					GoCode{
 						Expression: Expression{
 							Value: `"A"`,
 							Range: Range{
-								From: Position{
-									Index: 13,
-									Line:  1,
-									Col:   4,
-								},
-								To: Position{
-									Index: 16,
-									Line:  1,
-									Col:   7,
-								},
+								From: Position{Index: 17, Line: 1, Col: 4},
+								To:   Position{Index: 20, Line: 1, Col: 7},
 							},
 						},
-						TrailingSpace: SpaceVertical,
+						TrailingSpace: "\n",
 					},
 				},
 				Else: []Node{
-					StringExpression{
+					Whitespace{Value: "\n\t", GoTempl: true},
+					GoCode{
 						Expression: Expression{
 							Value: `"B"`,
 							Range: Range{
-								From: Position{
-									Index: 35,
-									Line:  3,
-									Col:   4,
-								},
-								To: Position{
-									Index: 38,
-									Line:  3,
-									Col:   7,
-								},
+								From: Position{Index: 39, Line: 3, Col: 4},
+								To:   Position{Index: 42, Line: 3, Col: 7},
 							},
 						},
-						TrailingSpace: SpaceVertical,
+						TrailingSpace: "\n",
 					},
 				},
 			},
@@ -144,87 +111,31 @@ func TestGoIfExpression(t *testing.T) {
 {{ end }}`,
 			expected: GoIfExpression{
 				Expression: Expression{
-					Value: `p.Test`,
+					GoTempl: true,
+					Value:   `p.Test`,
 					Range: Range{
 						From: Position{
-							Index: 4,
+							Index: 6,
 							Line:  0,
-							Col:   4,
+							Col:   6,
 						},
 						To: Position{
-							Index: 10,
+							Index: 12,
 							Line:  0,
-							Col:   10,
+							Col:   12,
 						},
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "  "},
+					Whitespace{Value: "\n  ", GoTempl: true},
 					Text{
-						Value: "text",
+						GoTempl: true,
+						Value:   "text",
 						Range: Range{
-							From: Position{Index: 18, Line: 1, Col: 4},
-							To:   Position{Index: 22, Line: 1, Col: 8},
+							From: Position{Index: 18, Line: 1, Col: 2},
+							To:   Position{Index: 22, Line: 1, Col: 6},
 						},
 						TrailingSpace: SpaceVertical,
-					},
-				},
-			},
-		},
-		{
-			name: "if: simple expression, without spaces",
-			input: `{{ if p.Test }}
-<span>
-  {{ "span content" }}
-</span>
-{{ end }}`,
-			expected: GoIfExpression{
-				Expression: Expression{
-					Value: `p.Test`,
-					Range: Range{
-						From: Position{
-							Index: 4,
-							Line:  0,
-							Col:   4,
-						},
-						To: Position{
-							Index: 10,
-							Line:  0,
-							Col:   10,
-						},
-					},
-				},
-				Then: []Node{
-					Element{
-						Name: "span",
-						NameRange: Range{
-							From: Position{Index: 16, Line: 1, Col: 2},
-							To:   Position{Index: 20, Line: 1, Col: 6},
-						},
-
-						Children: []Node{
-							Whitespace{Value: "\n  "},
-							StringExpression{
-								Expression: Expression{
-									Value: `"span content"`,
-									Range: Range{
-										From: Position{
-											Index: 28,
-											Line:  2,
-											Col:   6,
-										},
-										To: Position{
-											Index: 42,
-											Line:  2,
-											Col:   20,
-										},
-									},
-								},
-								TrailingSpace: SpaceVertical,
-							},
-						},
-						IndentChildren: true,
-						TrailingSpace:  SpaceVertical,
 					},
 				},
 			},
@@ -238,59 +149,45 @@ func TestGoIfExpression(t *testing.T) {
 {{ end }}`,
 			expected: GoIfExpression{
 				Expression: Expression{
-					Value: `p.A`,
+					GoTempl: true,
+					Value:   `p.A`,
 					Range: Range{
 						From: Position{
-							Index: 4,
+							Index: 6,
 							Line:  0,
-							Col:   4,
+							Col:   6,
 						},
 						To: Position{
-							Index: 7,
+							Index: 9,
 							Line:  0,
-							Col:   7,
+							Col:   9,
 						},
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\t"},
-					StringExpression{
+					Whitespace{Value: "\n\t", GoTempl: true},
+					GoCode{
 						Expression: Expression{
 							Value: `"A"`,
 							Range: Range{
-								From: Position{
-									Index: 12,
-									Line:  1,
-									Col:   4,
-								},
-								To: Position{
-									Index: 15,
-									Line:  1,
-									Col:   7,
-								},
+								From: Position{Index: 16, Line: 1, Col: 4},
+								To:   Position{Index: 19, Line: 1, Col: 7},
 							},
 						},
-						TrailingSpace: SpaceVertical,
+						TrailingSpace: "\n",
 					},
 				},
 				Else: []Node{
-					StringExpression{
+					Whitespace{Value: "\n\t", GoTempl: true},
+					GoCode{
 						Expression: Expression{
 							Value: `"B"`,
 							Range: Range{
-								From: Position{
-									Index: 33,
-									Line:  3,
-									Col:   4,
-								},
-								To: Position{
-									Index: 36,
-									Line:  3,
-									Col:   7,
-								},
+								From: Position{Index: 38, Line: 3, Col: 4},
+								To:   Position{Index: 41, Line: 3, Col: 7},
 							},
 						},
-						TrailingSpace: SpaceVertical,
+						TrailingSpace: "\n",
 					},
 				},
 			},
@@ -299,30 +196,32 @@ func TestGoIfExpression(t *testing.T) {
 			name: "if: nested",
 			input: `{{ if p.A }}
 					{{ if p.B }}
-						<div>{{ "B" }}</div>
+						{{ "C" }}
 					{{ end }}
 				{{ end }}`,
 			expected: GoIfExpression{
 				Expression: Expression{
-					Value: `p.A`,
+					GoTempl: true,
+					Value:   `p.A`,
 					Range: Range{
 						From: Position{
-							Index: 4,
+							Index: 6,
 							Line:  0,
-							Col:   4,
+							Col:   6,
 						},
 						To: Position{
-							Index: 7,
+							Index: 9,
 							Line:  0,
-							Col:   7,
+							Col:   9,
 						},
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\t\t\t\t\t"},
+					Whitespace{Value: "\t\t\t\t\t", GoTempl: true},
 					GoIfExpression{
 						Expression: Expression{
-							Value: `p.B`,
+							GoTempl: true,
+							Value:   `p.B`,
 							Range: Range{
 								From: Position{
 									Index: 20,
@@ -337,34 +236,16 @@ func TestGoIfExpression(t *testing.T) {
 							},
 						},
 						Then: []Node{
-							Whitespace{Value: "\t\t\t\t\t\t"},
-							Element{
-								Name: "div",
-								NameRange: Range{
-									From: Position{Index: 30, Line: 2, Col: 12},
-									To:   Position{Index: 33, Line: 2, Col: 15},
-								},
-								Children: []Node{
-									StringExpression{
-										Expression: Expression{
-											Value: `"B"`,
-											Range: Range{
-												From: Position{
-													Index: 35,
-													Line:  2,
-													Col:   17,
-												},
-												To: Position{
-													Index: 38,
-													Line:  2,
-													Col:   20,
-												},
-											},
-										},
-										TrailingSpace: SpaceNone,
+							Whitespace{Value: "\t\t\t\t\t\t", GoTempl: true},
+							GoCode{
+								Expression: Expression{
+									Value: `"C"`,
+									Range: Range{
+										From: Position{Index: 34, Line: 2, Col: 12},
+										To:   Position{Index: 37, Line: 2, Col: 15},
 									},
 								},
-								TrailingSpace: SpaceNone,
+								TrailingSpace: "\n\t\t\t\t\t",
 							},
 						},
 					},
@@ -384,7 +265,9 @@ func TestGoIfExpression(t *testing.T) {
 			}
 
 			// Ignore ranges in comparison, they are tested elsewhere.
-			if diff := cmp.Diff(tt.expected, result, cmp.AllowUnexported(GoIfExpression{}, StringExpression{}, Element{}, Whitespace{}, Expression{}, Position{})); diff != "" {
+			if diff := cmp.Diff(tt.expected, result, cmp.AllowUnexported(GoIfExpression{}, StringExpression{}, Element{}, Whitespace{}, Expression{
+				GoTempl: true,
+			}, Position{})); diff != "" {
 				t.Errorf("unexpected result, diff (-want +got):\n%s", diff)
 			}
 		})

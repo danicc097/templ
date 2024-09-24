@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/a-h/parse"
@@ -72,6 +71,7 @@ type goIfExpressionParser struct{}
 func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) {
 	var r GoIfExpression
 	start := pi.Index()
+	src, _ := pi.Peek(-1)
 
 	if _, ok, err = parse.All(
 		parse.OptionalWhitespace,
@@ -87,12 +87,27 @@ func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) 
 		return r, false, nil
 	}
 
-	// FIXME: default goexpression.If does not stop at }}
-	if r.Expression, err = parseGo("if", pi, goexpression.If); err != nil {
+	if _, ok, err = parse.StringUntil(parse.All(parse.String("}}"), parse.NewLine)).Parse(pi); err != nil || !ok {
+		pi.Seek(start)
+		return r, false, nil
+	}
+	ifCondEnd := pi.Index()
+	// inject { at ifCondEnd to the prevSrc string
+	// FIXME: nested if
+	// {{ if p.A }}
+	// 	{{ if p.B }}
+	// 		{{ "C" }}
+	// 	{{ end }}
+	// {{ end }}
+	newSrc := src[:ifCondEnd] + "{}" // replace }}\n with {} for if condition parsing.
+	pi2 := parse.NewInput(newSrc)
+
+	parse.All(parse.OptionalWhitespace, parse.String("{{"), parse.OptionalWhitespace).Parse(pi2)
+	// at this point we should have `if ... {}` to verify the if condition is syntactically correct
+	if r.Expression, err = parseGo("if", pi2, goexpression.If); err != nil {
 		return r, false, err
 	}
 	r.Expression.GoTempl = true
-	fmt.Printf("r.Expression.Value: %v\n", r.Expression.Value)
 
 	if _, ok, err = parse.All(parse.OptionalWhitespace, parse.String("}}")).Parse(pi); err != nil || !ok {
 		err = parse.Error(`if: expected closing "}}" but was not found`, pi.Position())

@@ -59,6 +59,7 @@ func If(content string) (start, end int, err error) {
 		if !ok {
 			return 0, 0, ErrExpectedNodeNotFound
 		}
+
 		start = int(stmt.If) + len("if")
 		end = latestEnd(start, stmt.Init, stmt.Cond)
 		return start, end, nil
@@ -303,6 +304,8 @@ type Extractor func(body []ast.Stmt) (start, end int, err error)
 func extract(content string, extractor Extractor) (start, end int, err error) {
 	prefix := "package main\nfunc templ_container() {\n"
 	src := prefix + content
+
+	fmt.Printf("src: %v\n", src)
 
 	node, parseErr := parser.ParseFile(token.NewFileSet(), "", src, parser.AllErrors)
 	if node == nil {
