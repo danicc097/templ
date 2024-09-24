@@ -42,9 +42,9 @@ func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error)
 	var r GoForExpression
 	start := pi.Index()
 
-	_, _, _ = parse.OptionalWhitespace.Parse(pi)
+	// do not remove leading whitespace, since string expression go templates can be inlined
+	// _, _, _ = parse.OptionalWhitespace.Parse(pi)
 
-	// Detect the `{{ for ` syntax, allowing for optional spaces around `{{`.
 	if _, ok, err = parse.All(
 		parse.OptionalWhitespace,
 		parse.String("{{"),
