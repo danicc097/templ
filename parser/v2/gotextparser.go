@@ -38,6 +38,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	}
 
 	// Parse trailing whitespace.
+	wsStart := pi.Position()
 	ws, _, err := parse.Whitespace.Parse(pi)
 	if err != nil {
 		return t, false, err
@@ -46,6 +47,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	if err != nil {
 		return t, false, err
 	}
+	pi.Seek(wsStart.Index) // leave whitespace behind so next text node is spaced as is
 
 	return t, true, nil
 })

@@ -29,7 +29,7 @@ var gotemplate = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, err er
 	// Once we're in a gotemplate, we should expect some gotemplate whitespace, if/switch/for,
 	// or node string expressions etc.
 	var nodes Nodes
-	nodes, ok, err = newGoTemplateNodeParser(closeBraceWithOptionalPadding, "gotemplate closing brace").Parse(pi)
+	nodes, ok, err = newGoTemplateNodeParser(lastCloseBraceWithOptionalPadding, "gotemplate closing brace").Parse(pi)
 	if err != nil {
 		return
 	}

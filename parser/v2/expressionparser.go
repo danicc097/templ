@@ -42,6 +42,12 @@ var openBraceWithOptionalPadding = parse.Any(openBraceWithPadding, openBrace)
 var (
 	closeBrace                    = parse.String("}")
 	closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
+	// TODO: for gotempl we need to match } if its the last one, ie until exactly "}\n\n" or "}\n*EOF"
+	lastCloseBraceWithOptionalPadding = parse.Any(
+		parse.StringFrom(optionalSpaces, closeBrace, parse.NewLine, parse.EOF[string]()),
+		// now match } and two newlines
+		parse.StringFrom(optionalSpaces, closeBrace, parse.NewLine, parse.NewLine),
+	)
 )
 
 var (

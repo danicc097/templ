@@ -62,7 +62,7 @@ func Package() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("var")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 35, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 35, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -75,7 +75,7 @@ func Package() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("var")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 36, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 36, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -94,13 +94,13 @@ func Package() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"ab\"\n")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" \"ab\"\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		first := items[0]
 		for _, i := range items {
-			/* comment with ignored syntax %{ "var" }%  {{ a := "" }} */
+			/* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y))
 			if templ_7745c5c3_Err != nil {
@@ -126,7 +126,7 @@ func Package() templ.Component {
 				}
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("const z = \"z\"\n // for i := 0; i < 3; i++ { println(\"z\") }\n // FIXME: for not being parsed as plain text\n // for i := 0; i < 3; i++ {\n //   println(\"z\")\n // }\n")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("const z = \"z\"\n // FIXME: should respect indent for Text nodes inside gotempl.\n // we will apply gofumpt to output anyway\n func main() {\n for i := 0; i < 3; i++ { println(\"z\") }\n for i := 0; i < 3; i++ {\n println(\"z\")\n }\n }\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

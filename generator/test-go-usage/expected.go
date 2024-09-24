@@ -24,8 +24,13 @@ const _ab = "ab"
 // nested 3
 const z = "z"
 
-// for i := 0; i < 3; i++ { println("z") }
-// FIXME: for not being parsed as plain text
-// for i := 0; i < 3; i++ {
-//   println("z")
-// }
+// FIXME: should respect indent for Text nodes inside gotempl.
+// we will apply gofumpt to output anyway
+func main() {
+	for i := 0; i < 3; i++ {
+		println("z")
+	}
+	for i := 0; i < 3; i++ {
+		println("z")
+	}
+}

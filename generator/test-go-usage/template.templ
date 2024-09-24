@@ -18,13 +18,13 @@ can adopt the same in gotempl expressions for consistency
 */
 
 gotempl Package() {
-	/*
-	Package testgousage.
-	*/
-	package testgousage
-	// A comment that should be rendered
-	/* Another comment that should be rendered
-	*/
+/*
+Package testgousage.
+*/
+package testgousage
+// A comment that should be rendered
+/* Another comment that should be rendered
+*/
 	{{ /* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */ }}
 	{{ /* TODO: dont render extra spaces in new lines */ }}
 	{{ /* this should not be printed */ }}
@@ -32,9 +32,9 @@ gotempl Package() {
 y := "y"
 /**/
 	}}
-	// comment with %{ "var" }% with space
-	// comment with%{ "var" }%without space
-	%{ "const _ab = " }%"ab"
+// comment with %{ "var" }% with space
+// comment with%{ "var" }%without space
+	%{ "const _ab = " }% "ab"
 	{{ first := items[0] }}
 	 {{ for _, i := range items }}
 		{{ /* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */ }}
@@ -43,12 +43,15 @@ y := "y"
 			%{ fmt.Sprintf("// nested %d\n", j) }%
 		{{ end }}
 	{{ end }}
-	const z = "z"
-	// for i := 0; i < 3; i++ { println("z") }
-	// FIXME: for not being parsed as plain text
-	// for i := 0; i < 3; i++ {
-	//   println("z")
-	// }
+const z = "z"
+// FIXME: should respect indent for Text nodes inside gotempl.
+// we will apply gofumpt to output anyway
+func main() {
+for i := 0; i < 3; i++ { println("z") }
+for i := 0; i < 3; i++ {
+println("z")
+}
+}
 }
 
 // Combine all tests.

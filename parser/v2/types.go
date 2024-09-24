@@ -444,6 +444,10 @@ func (t Text) Trailing() TrailingSpace {
 
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
+	if t.GoTempl { // leave as is, will format output later when the complete go file is written. FIXME: left trailing space being removed
+		_, err := io.WriteString(w, t.Value)
+		return err
+	}
 	return writeIndent(w, indent, t.Value)
 }
 
