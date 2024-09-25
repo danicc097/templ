@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"fmt"
 	"io"
+	"os"
 
 	"github.com/a-h/parse"
 	"github.com/a-h/templ/parser/v2/goexpression"
@@ -62,7 +64,11 @@ func (ie GoIfExpression) Write(w io.Writer, indent int) error {
 	return nil
 }
 
-var gountilElseIfElseOrEnd = parse.Any(StripType(goelseIfExpression), StripType(goelseExpression), StripType(goTemplExpressionEnd))
+// until {{ else if, {{ else or {{ end }}
+var (
+	gountilElseIfElseOrEnd = parse.Any(StripType(goelseIfExpression), StripType(goelseExpression), StripType(goTemplExpressionEnd))
+	gountilIfBlockEnd      = parse.StringUntil(parse.All(parse.OptionalWhitespace, parse.String("}}"), parse.NewLine))
+)
 
 var goIfExpression parse.Parser[Node] = goIfExpressionParser{}
 
@@ -81,39 +87,62 @@ func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) 
 		pi.Seek(start)
 		return r, false, nil
 	}
-
 	if !peekPrefix(pi, "if ") {
 		pi.Seek(start)
 		return r, false, nil
 	}
 
-	if _, ok, err = parse.StringUntil(parse.All(parse.String("}}"), parse.NewLine)).Parse(pi); err != nil || !ok {
-		pi.Seek(start)
-		return r, false, nil
-	}
-	ifCondEnd := pi.Index()
-	// inject { at ifCondEnd to the prevSrc string
+	ifStart := pi.Index()
+	// src starts with if now.
+
 	// FIXME: nested if
 	// {{ if p.A }}
-	// 	{{ if p.B }}
+	// 	{{ if p.B }} is
 	// 		{{ "C" }}
 	// 	{{ end }}
 	// {{ end }}
-	newSrc := src[:ifCondEnd] + "{}" // replace }}\n with {} for if condition parsing.
-	pi2 := parse.NewInput(newSrc)
+	//  this stops at }} in p.B when its nested, leading to expression :
+	// if p.B }}  {{{}
+	fmt.Fprintf(os.Stderr, "src: %v\n-----\n", src)
+	// eat if stmt before the }}\n in input
+	if _, ok, err = gountilIfBlockEnd.Parse(pi); err != nil || !ok {
+		pi.Seek(start)
+		return r, false, nil
+	}
+	// construct valid go syntax for if condition
+	ifCondEnd := pi.Index()
+	if ifCondEnd > len(src) {
+		return r, false, err
+	}
+	ifStmt := src[ifStart:ifCondEnd] + "{}" // replace }}\n with {} for if condition parsing.
+	piIfStmt := parse.NewInput(ifStmt)
+	fmt.Printf("ifStmt: %v\n", ifStmt)
 
-	parse.All(parse.OptionalWhitespace, parse.String("{{"), parse.OptionalWhitespace).Parse(pi2)
+	// TODO: forget about reusing goexpression.If
+	// and have our own one that matches before }} so all expression indexes are valid.
+	parse.All(parse.OptionalWhitespace, parse.String("{{"), parse.OptionalWhitespace).Parse(piIfStmt)
+	ifStmtStart := piIfStmt.Index()
+	// parse.All(parse.OptionalWhitespace, parse.String("}}"), parse.NewLine).Parse(piIfStmt)
+	// ifStmtEnd := piIfStmt.Index()
+	ifStmtAfterTrim := ifStmt[ifStmtStart:]
+	fmt.Printf("ifStmtAfterTrim: %v\n---\n", ifStmtAfterTrim)
 	// at this point we should have `if ... {}` to verify the if condition is syntactically correct
-	if r.Expression, err = parseGo("if", pi2, goexpression.If); err != nil {
+	if r.Expression, err = parseGo("if", piIfStmt, goexpression.If); err != nil {
 		return r, false, err
 	}
 	r.Expression.GoTempl = true
 
+	// _, _, _ = parse.All(parse.OptionalWhitespace, parse.String("}}"), parse.NewLine).Parse(pi)
+
+	// now eat first }}\n after if cond in the actual input
 	if _, ok, err = parse.All(parse.OptionalWhitespace, parse.String("}}")).Parse(pi); err != nil || !ok {
 		err = parse.Error(`if: expected closing "}}" but was not found`, pi.Position())
 		return r, false, err
 	}
+	src3, _ := pi.Peek(-1)
+	fmt.Printf("src after if parsing: %v\n...........\n", src3)
 
+	// we may also have nested {{ if ... }} ... {{ end }} and we want to stop at the first elseif/else/end found after parsing those nodes
 	np := newGoTemplateNodeParser(gountilElseIfElseOrEnd, "else expression or closing {{end}}")
 	var thenNodes Nodes
 	if thenNodes, ok, err = np.Parse(pi); err != nil || !ok {
@@ -167,6 +196,7 @@ func (goelseIfExpressionParser) Parse(pi *parse.Input) (r GoElseIfExpression, ok
 		return r, false, err
 	}
 
+	// same possibility as if
 	np := newGoTemplateNodeParser(gountilElseIfElseOrEnd, "else expression or closing brace")
 	var thenNodes Nodes
 	if thenNodes, ok, err = np.Parse(pi); err != nil || !ok {

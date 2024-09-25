@@ -66,6 +66,33 @@ func If(content string) (start, end int, err error) {
 	})
 }
 
+func GoIf(content string) (start, end int, err error) {
+	if !strings.HasPrefix(content, "if") {
+		return 0, 0, ErrExpectedNodeNotFound
+	}
+
+	// first }}
+	closingBracesIndex := strings.Index(content, "}}")
+
+	return extract(content, func(body []ast.Stmt) (start, end int, err error) {
+		stmt, ok := body[0].(*ast.IfStmt)
+		if !ok {
+			return 0, 0, ErrExpectedNodeNotFound
+		}
+
+		// range start for if expr
+		start = int(stmt.If) + len("if")
+		end = latestEnd(start, stmt.Init, stmt.Cond)
+
+		// If "}}" is found and it's before the calculated end somehow, use it.
+		if closingBracesIndex != -1 && closingBracesIndex < end {
+			end = closingBracesIndex + len("}}")
+		}
+
+		return start, end, nil
+	})
+}
+
 func For(content string) (start, end int, err error) {
 	if !strings.HasPrefix(content, "for") {
 		return 0, 0, ErrExpectedNodeNotFound
@@ -304,8 +331,6 @@ type Extractor func(body []ast.Stmt) (start, end int, err error)
 func extract(content string, extractor Extractor) (start, end int, err error) {
 	prefix := "package main\nfunc templ_container() {\n"
 	src := prefix + content
-
-	fmt.Printf("src: %v\n", src)
 
 	node, parseErr := parser.ParseFile(token.NewFileSet(), "", src, parser.AllErrors)
 	if node == nil {

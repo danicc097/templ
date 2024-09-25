@@ -14,7 +14,7 @@ func TestGoIfExpression(t *testing.T) {
 		expected GoIfExpression
 	}{
 		{
-			name: "if: simple expression",
+			name: "if simple expression",
 			input: `{{ if p.Test }}
   %{ "content" }%
 {{ end }}`,
@@ -53,7 +53,7 @@ func TestGoIfExpression(t *testing.T) {
 			},
 		},
 		{
-			name: "if: else",
+			name: "if else",
 			input: `{{ if p.A }}
 	{{ "A" }}
 {{ else }}
@@ -105,7 +105,7 @@ func TestGoIfExpression(t *testing.T) {
 			},
 		},
 		{
-			name: "if: expressions can have a space after the opening brace",
+			name: "if expressions can have a space after the opening brace",
 			input: `{{ if p.Test }}
   text
 {{ end }}`,
@@ -141,7 +141,7 @@ func TestGoIfExpression(t *testing.T) {
 			},
 		},
 		{
-			name: "if: else, without spaces",
+			name: "if else, without spaces",
 			input: `{{ if p.A}}
 	{{ "A" }}
 {{ else }}
@@ -193,7 +193,7 @@ func TestGoIfExpression(t *testing.T) {
 			},
 		},
 		{
-			name: "if: nested",
+			name: "if nested",
 			input: `{{ if p.A }}
 					{{ if p.B }}
 						{{ "C" }}
