@@ -45,6 +45,11 @@ y := "y"
 	{{ end }}
 	{{ if true }}
 		%{ "var abc = \"abc\"\n" }%
+   {{/* FIXME outputs else if  {*/}}
+  {{ else if first == "1" }}
+    %{ "should never print this" }%
+  {{ else }}
+    %{ "should never print this either" }%
 	{{ end }}
   // FIXME: should respect indent for Text nodes inside gotempl.
   // we will apply gofumpt to output anyway
