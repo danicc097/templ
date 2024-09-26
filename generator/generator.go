@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html"
 	"io"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -658,21 +657,29 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 	case parser.SwitchExpression:
 		err = g.writeSwitchExpression(indentLevel, n, next)
 	case parser.StringExpression:
-		fmt.Fprintf(os.Stderr, "parser.StringExpression: %v\n", n.Expression.Value)
+		// fmt.Fprintf(os.Stderr, "parser.StringExpression: %v\n", n.Expression.Value)
 		err = g.writeStringExpression(indentLevel, n.Expression)
 	case parser.GoCode:
 		err = g.writeGoCode(indentLevel, n.Expression)
 	case parser.Whitespace:
-		fmt.Fprintf(os.Stderr, "parser.Whitespace: %v\n", n.Value)
+		// fmt.Fprintf(os.Stderr, "parser.Whitespace: %v\n", n.Value)
 		err = g.writeWhitespace(indentLevel, n)
 	case parser.Text:
-		fmt.Fprintf(os.Stderr, "parser.Text: %v\n", n.Value)
+		// fmt.Fprintf(os.Stderr, "parser.Text: %v\n", n.Value)
 		err = g.writeText(indentLevel, n)
 	case parser.GoComment:
 		// Do not render Go comments in the output HTML.
 		return
 	case parser.GoForExpression:
 		err = g.writeForExpression(indentLevel, parser.ForExpression(n), next)
+	case parser.GoIfExpression:
+		elseIfs := make([]parser.ElseIfExpression, len(n.ElseIfs))
+		err = g.writeIfExpression(indentLevel, parser.IfExpression{
+			Expression: n.Expression,
+			Then:       n.Then,
+			ElseIfs:    elseIfs,
+			Else:       n.Else,
+		}, next)
 	case nil: // empty comment blocks in gotempl should be kept in the template but not rendered
 		return
 	default:

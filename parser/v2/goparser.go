@@ -74,3 +74,29 @@ func parseGo(name string, pi *parse.Input, e extractor) (r Expression, err error
 	pi.Take(end)
 	return NewExpression(expr, pi.PositionAt(from+start), pi.PositionAt(from+end)), nil
 }
+
+func parseGotemplGo(name string, pi *parse.Input, e extractor) (r Expression, err error) {
+	from := pi.Index()
+
+	var ok bool
+	var ifBlock string
+	if ifBlock, ok, err = gountilIfBlockEnd.Parse(pi); err != nil || !ok {
+		pi.Seek(from)
+		if err == nil && !ok {
+			return r, parse.Error("%s: invalid go expression", pi.Position())
+		}
+		return r, parse.Error(fmt.Sprintf("%s: invalid go expression: %v", name, err.Error()), pi.Position())
+	}
+	ifBlock = strings.TrimPrefix(ifBlock, "else ")
+
+	start, end, err := e(ifBlock + "{}")
+	if err != nil {
+		return r, parse.Error(fmt.Sprintf("%s: invalid go expression: %v", name, err.Error()), pi.Position())
+	}
+	if start > end || start < 0 || end < 0 || end > len(ifBlock) {
+		return r, parse.Error("invalid go expression", pi.Position())
+	}
+	expr := ifBlock[start:end]
+
+	return NewExpression(expr, pi.PositionAt(from+start), pi.PositionAt(from+end)), nil
+}

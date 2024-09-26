@@ -22,11 +22,12 @@ const _ab = "ab"
 // nested 1
 // nested 2
 // nested 3
-const z = "z"
+var abc = "abc"
 
 // FIXME: should respect indent for Text nodes inside gotempl.
 // we will apply gofumpt to output anyway
 func main() {
+	const z = "z"
 	for i := 0; i < 3; i++ {
 		println("z")
 	}

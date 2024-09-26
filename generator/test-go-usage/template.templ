@@ -43,11 +43,14 @@ y := "y"
 			%{ fmt.Sprintf("// nested %d\n", j) }%
 		{{ end }}
 	{{ end }}
-  const z = "z"
+	{{ if true }}
+		%{ "var abc = \"abc\"\n" }%
+	{{ end }}
   // FIXME: should respect indent for Text nodes inside gotempl.
   // we will apply gofumpt to output anyway
   func main() {
-  for i := 0; i < 3; i++ { println("z") }
+    const z = "z"
+    for i := 0; i < 3; i++ { println("z") }
     for i := 0; i < 3; i++ {
       println("z")
     }

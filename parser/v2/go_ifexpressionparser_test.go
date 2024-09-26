@@ -36,7 +36,7 @@ func TestGoIfExpression(t *testing.T) {
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\n  ", GoTempl: true},
+					Whitespace{Value: "  ", GoTempl: true},
 					StringExpression{
 						Expression: Expression{
 							Value: `"content"`,
@@ -77,7 +77,7 @@ func TestGoIfExpression(t *testing.T) {
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\n\t", GoTempl: true},
+					Whitespace{Value: "\t", GoTempl: true},
 					GoCode{
 						Expression: Expression{
 							Value: `"A"`,
@@ -105,6 +105,70 @@ func TestGoIfExpression(t *testing.T) {
 			},
 		},
 		{
+			name: "if else if",
+			input: `{{ if p.A }}
+	{{ "A" }}
+{{ else if p.B }}
+	{{ "B" }}
+{{ end }}`,
+			expected: GoIfExpression{
+				Expression: Expression{
+					GoTempl: true,
+					Value:   `p.A`,
+					Range: Range{
+						From: Position{
+							Index: 6,
+							Line:  0,
+							Col:   6,
+						},
+						To: Position{
+							Index: 9,
+							Line:  0,
+							Col:   9,
+						},
+					},
+				},
+				Then: []Node{
+					Whitespace{Value: "\t", GoTempl: true},
+					GoCode{
+						Expression: Expression{
+							Value: `"A"`,
+							Range: Range{
+								From: Position{Index: 17, Line: 1, Col: 4},
+								To:   Position{Index: 20, Line: 1, Col: 7},
+							},
+						},
+						TrailingSpace: "\n",
+					},
+				},
+				ElseIfs: []GoElseIfExpression{
+					{
+						Expression: Expression{
+							Value:   "p.B",
+							GoTempl: true,
+							Range: Range{
+								From: Position{Index: 30, Line: 2, Col: 6},
+								To:   Position{Index: 33, Line: 2, Col: 9},
+							},
+						},
+						Then: []Node{
+							Whitespace{Value: "\t", GoTempl: true},
+							GoCode{
+								Expression: Expression{
+									Value: `"B"`,
+									Range: Range{
+										From: Position{Index: 46, Line: 3, Col: 4},
+										To:   Position{Index: 49, Line: 3, Col: 7},
+									},
+								},
+								TrailingSpace: "\n",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "if expressions can have a space after the opening brace",
 			input: `{{ if p.Test }}
   text
@@ -127,7 +191,7 @@ func TestGoIfExpression(t *testing.T) {
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\n  ", GoTempl: true},
+					Whitespace{Value: "  ", GoTempl: true},
 					Text{
 						GoTempl: true,
 						Value:   "text",
@@ -165,7 +229,7 @@ func TestGoIfExpression(t *testing.T) {
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\n\t", GoTempl: true},
+					Whitespace{Value: "\t", GoTempl: true},
 					GoCode{
 						Expression: Expression{
 							Value: `"A"`,
@@ -217,21 +281,20 @@ func TestGoIfExpression(t *testing.T) {
 					},
 				},
 				Then: []Node{
-					Whitespace{Value: "\t\t\t\t\t", GoTempl: true},
 					GoIfExpression{
 						Expression: Expression{
 							GoTempl: true,
 							Value:   `p.B`,
 							Range: Range{
 								From: Position{
-									Index: 20,
+									Index: 24,
 									Line:  1,
-									Col:   10,
+									Col:   11,
 								},
 								To: Position{
-									Index: 23,
+									Index: 27,
 									Line:  1,
-									Col:   13,
+									Col:   14,
 								},
 							},
 						},
@@ -241,11 +304,11 @@ func TestGoIfExpression(t *testing.T) {
 								Expression: Expression{
 									Value: `"C"`,
 									Range: Range{
-										From: Position{Index: 34, Line: 2, Col: 12},
-										To:   Position{Index: 37, Line: 2, Col: 15},
+										From: Position{Index: 40, Line: 2, Col: 9},
+										To:   Position{Index: 43, Line: 2, Col: 12},
 									},
 								},
-								TrailingSpace: "\n\t\t\t\t\t",
+								TrailingSpace: "\n",
 							},
 						},
 					},
@@ -265,9 +328,7 @@ func TestGoIfExpression(t *testing.T) {
 			}
 
 			// Ignore ranges in comparison, they are tested elsewhere.
-			if diff := cmp.Diff(tt.expected, result, cmp.AllowUnexported(GoIfExpression{}, StringExpression{}, Element{}, Whitespace{}, Expression{
-				GoTempl: true,
-			}, Position{})); diff != "" {
+			if diff := cmp.Diff(tt.expected, result, cmp.AllowUnexported(GoIfExpression{}, StringExpression{}, Element{}, Whitespace{}, Expression{}, Position{})); diff != "" {
 				t.Errorf("unexpected result, diff (-want +got):\n%s", diff)
 			}
 		})
