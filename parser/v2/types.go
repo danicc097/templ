@@ -7,6 +7,7 @@ import (
 	"go/format"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -442,18 +443,24 @@ type Text struct {
 	// Value is the raw HTML encoded value.
 	Value string
 	// TrailingSpace lists what happens after the text.
-	TrailingSpace TrailingSpace
-	GoTempl       bool
+	TrailingSpace    TrailingSpace
+	LeadingSpaceLit  string
+	TrailingSpaceLit string
+	GoTempl          bool
 }
 
 func (t Text) Trailing() TrailingSpace {
 	return t.TrailingSpace
 }
 
+func (t Text) String() string {
+	return fmt.Sprintf("Text([%s]%s[%s])", strconv.Quote(t.LeadingSpaceLit), t.Value, strconv.Quote(t.TrailingSpaceLit))
+}
+
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
 	if t.GoTempl { // leave as is since we are not removing whitespace with gotempl.
-		_, err := io.WriteString(w, t.Value)
+		_, err := io.WriteString(w, t.LeadingSpaceLit+t.Value+t.TrailingSpaceLit)
 		return err
 	}
 	return writeIndent(w, indent, t.Value)
@@ -629,6 +636,10 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 		}
 		if err := nodes[i].Write(w, level); err != nil {
 			return err
+		}
+
+		if t, ok := nodes[i].(Text); ok && t.GoTempl {
+			continue // skip extra trailing
 		}
 
 		// Apply trailing whitespace if present.

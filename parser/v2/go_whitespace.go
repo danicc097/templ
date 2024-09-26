@@ -1,10 +1,11 @@
 package parser
 
-import "github.com/a-h/parse"
+import (
+	"github.com/a-h/parse"
+)
 
 var gowhitespaceExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
-	var r Whitespace
-	r.GoTempl = true
+	r := Whitespace{GoTempl: true}
 	if r.Value, ok, err = parse.OptionalWhitespace.Parse(pi); err != nil || !ok {
 		return
 	}

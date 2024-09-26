@@ -12,7 +12,6 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 
 	// Attempt to parse the prefix first.
 	if _, ok, err = openGotemplStringExprWithOptionalPadding.Parse(pi); err != nil || !ok {
-
 		pi.Seek(start)
 		return nil, false, err
 	}

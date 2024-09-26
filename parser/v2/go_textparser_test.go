@@ -51,7 +51,7 @@ func TestGoTextParser(t *testing.T) {
 		},
 		{
 			name:  "Multiline text is collected line by line",
-			input: "Line 1\nLine 2",
+			input: "Line 1\n  Line 2",
 			expected: Text{
 				GoTempl: true,
 				Value:   "Line 1",
@@ -59,20 +59,22 @@ func TestGoTextParser(t *testing.T) {
 					From: Position{Index: 0, Line: 0, Col: 0},
 					To:   Position{Index: 6, Line: 0, Col: 6},
 				},
-				TrailingSpace: "\n",
+				LeadingSpaceLit: "",
+				TrailingSpace:   "\n",
 			},
 		},
 		{
-			name:  "Multiline text is collected line by line keeping trailing space",
-			input: "\t  Line 1\nLine 2",
+			name:  "Multiline text is collected line by line keeping leading space",
+			input: "\t  Line 1\n    Line 2",
 			expected: Text{
 				GoTempl: true,
-				Value:   "\t  Line 1",
+				Value:   "Line 1",
 				Range: Range{
 					From: Position{Index: 0, Line: 0, Col: 0},
 					To:   Position{Index: 9, Line: 0, Col: 9},
 				},
-				TrailingSpace: "\n",
+				LeadingSpaceLit: "\t  ",
+				TrailingSpace:   "\n",
 			},
 		},
 		{
@@ -85,7 +87,8 @@ func TestGoTextParser(t *testing.T) {
 					From: Position{Index: 0, Line: 0, Col: 0},
 					To:   Position{Index: 6, Line: 0, Col: 6},
 				},
-				TrailingSpace: "\n",
+				LeadingSpaceLit: "",
+				TrailingSpace:   "\n",
 			},
 		},
 	}

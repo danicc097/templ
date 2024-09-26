@@ -13,9 +13,10 @@ var ErrSingleLineCommentInGotempl = errors.New("Use /**/ syntax for single line 
 
 var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	src, _ := pi.Peek(-1)
-	startPos := pi.Position()
+	start := pi.Index()
 	// Check the prefix first.
 	if _, ok, err = parse.Or(parse.String("{{ "), parse.String("{{")).Parse(pi); err != nil || !ok {
+		pi.Seek(start) // might be just text
 		return
 	}
 	hasLineComment := peekPrefix(pi, "//")
@@ -24,16 +25,16 @@ var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	}
 	var r GoCode
 	pi2 := parse.NewInput(src)
-	_, _, _ = parse.OptionalWhitespace.Parse(pi)
+	ws, _, _ := parse.OptionalWhitespace.Parse(pi)
 	commentStartPos := pi2.Position()
 	_, _, _ = goTemplComment.Parse(pi2)
 	commentEndPos := pi2.Position()
 	_, _, _ = parse.OptionalWhitespace.Parse(pi2)
 
-	// there is only a comment, nothing else
 	if _, ok, _ = dblCloseBraceWithOptionalPadding.Parse(pi2); ok {
-		commentStartPosIndex := commentStartPos.Index - startPos.Index
-		commentEndPosIndex := commentEndPos.Index - startPos.Index
+		// there is only a comment, nothing else
+		commentStartPosIndex := commentStartPos.Index - start
+		commentEndPosIndex := commentEndPos.Index - start
 		if commentEndPosIndex-commentStartPosIndex > 0 && commentEndPosIndex <= len(src) {
 			commentExpr := src[commentStartPosIndex:commentEndPosIndex]
 
@@ -67,7 +68,7 @@ var goCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	}
 
 	// Parse trailing whitespace.
-	ws, _, err := parse.Whitespace.Parse(pi)
+	ws, _, err = parse.Whitespace.Parse(pi)
 	if err != nil {
 		return r, false, err
 	}
