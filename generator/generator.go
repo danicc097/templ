@@ -674,6 +674,9 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 		err = g.writeForExpression(indentLevel, parser.ForExpression(n), next)
 	case parser.GoIfExpression:
 		elseIfs := make([]parser.ElseIfExpression, len(n.ElseIfs))
+		for i, e := range n.ElseIfs {
+			elseIfs[i] = parser.ElseIfExpression(e)
+		}
 		err = g.writeIfExpression(indentLevel, parser.IfExpression{
 			Expression: n.Expression,
 			Then:       n.Then,
@@ -1527,10 +1530,6 @@ func (g *generator) writeStringExpression(indentLevel int, e parser.Expression) 
 }
 
 func (g *generator) writeWhitespace(indentLevel int, n parser.Whitespace) (err error) {
-	if n.GoTempl {
-		fmt.Printf("n.GoTempl: %v\n", n.GoTempl)
-		fmt.Printf("n.Value: %v\n", n.Value)
-	}
 	if len(n.Value) == 0 {
 		return
 	}

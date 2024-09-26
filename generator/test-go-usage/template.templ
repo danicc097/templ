@@ -45,8 +45,7 @@ y := "y"
 	{{ end }}
 	{{ if true }}
 		%{ "var abc = \"abc\"\n" }%
-   {{/* FIXME outputs else if  {*/}}
-  {{ else if first == "1" }}
+  {{ else if first == 999 }}
     %{ "should never print this" }%
   {{ else }}
     %{ "should never print this either" }%
