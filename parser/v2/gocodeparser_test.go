@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/a-h/parse"
@@ -10,10 +9,9 @@ import (
 
 func TestGoCodeParser(t *testing.T) {
 	tests := []struct {
-		name        string
-		input       string
-		expected    GoCode
-		errContains string
+		name     string
+		input    string
+		expected GoCode
 	}{
 		{
 			name:  "basic expression",
@@ -66,14 +64,15 @@ func TestGoCodeParser(t *testing.T) {
 			}}`,
 			expected: GoCode{
 				Expression: Expression{
-					Value: `p := func() {
+					Value: `
+				p := func() {
 					dosomething()
 				}`,
 					Range: Range{
 						From: Position{
-							Index: 7,
-							Line:  1,
-							Col:   4,
+							Index: 2,
+							Line:  0,
+							Col:   2,
 						},
 						To: Position{
 							Index: 45,
@@ -86,8 +85,8 @@ func TestGoCodeParser(t *testing.T) {
 			},
 		},
 		{
-			name: "comments in expression 1",
-			input: `{{ // Comment at the start of expression.
+			name: "comments in expression",
+			input: `{{
 	one := "one"
 	two := "two"
 	// Comment in middle of expression.
@@ -96,68 +95,16 @@ func TestGoCodeParser(t *testing.T) {
 }}`,
 			expected: GoCode{
 				Expression: Expression{
-					Value: `// Comment at the start of expression.
+					Value: `
 	one := "one"
 	two := "two"
 	// Comment in middle of expression.
 	four := "four"
 	// Comment at end of expression.`,
 					Range: Range{
-						From: Position{Index: 3, Line: 0, Col: 3},
-						To:   Position{Index: 156, Line: 5, Col: 33},
+						From: Position{Index: 2, Line: 0, Col: 2},
+						To:   Position{Index: 117, Line: 5, Col: 33},
 					},
-				},
-				TrailingSpace: SpaceNone,
-				Multiline:     true,
-			},
-		},
-		{
-			name:  "line comments in expression 1",
-			input: `{{ // Comment only }}`,
-			expected: GoCode{
-				Expression: Expression{
-					Value: "// Comment only",
-					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
-				},
-				TrailingSpace: SpaceNone,
-				Multiline:     false,
-			},
-			errContains: ErrSingleLineCommentInGotempl.Error(),
-		},
-		{
-			name:  "line comments in expression 2",
-			input: `{{ // Comment only }}`,
-			expected: GoCode{
-				Expression: Expression{
-					Value: "// Comment only",
-					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
-				},
-				TrailingSpace: SpaceNone,
-				Multiline:     false,
-			},
-			errContains: ErrSingleLineCommentInGotempl.Error(),
-		},
-		{
-			name:  "block comments in expression 1",
-			input: `{{ /* Comment only */ }}`,
-			expected: GoCode{
-				Expression: Expression{
-					Value: "/* Comment only */",
-					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 21, Line: 0, Col: 21}},
-				},
-				TrailingSpace: SpaceNone,
-				Multiline:     false,
-			},
-		},
-		{
-			name: "block comments in expression 1",
-			input: `{{ /* Comment only
-				*/ }}`,
-			expected: GoCode{
-				Expression: Expression{
-					Value: `/* Comment only
-				*/`,
-					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 25, Line: 1, Col: 6}},
 				},
 				TrailingSpace: SpaceNone,
 				Multiline:     true,
@@ -169,23 +116,11 @@ func TestGoCodeParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			input := parse.NewInput(tt.input)
 			an, ok, err := goCode.Parse(input)
-			if (err != nil) != (tt.errContains != "") {
+			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
-			}
-			if tt.errContains != "" {
-				if !strings.Contains(err.Error(), tt.errContains) {
-					t.Fatalf("expected error to contain %q, got %q", tt.errContains, err.Error())
-				}
-				return
 			}
 			if !ok {
 				t.Fatalf("unexpected failure for input %q", tt.input)
-			}
-			if (an == nil) != (tt.expected.Expression.Value == "") {
-				t.Fatalf("no node was returned, but an expression value was expected")
-			}
-			if an == nil {
-				return
 			}
 			actual := an.(GoCode)
 			if diff := cmp.Diff(tt.expected, actual); diff != "" {

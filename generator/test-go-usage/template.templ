@@ -18,15 +18,17 @@ can adopt the same in gotempl expressions for consistency
 */
 
 gotempl Package() {
-/*
-Package testgousage.
-*/
-package testgousage
-// A comment that should be rendered
-/* Another comment that should be rendered
-*/
+  /*
+  Package testgousage.
+  */
+  package testgousage
+  
+  // A comment that should be rendered
+  /* Another comment that should be rendered
+  */
 	{{ /* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */ }}
 	{{ /* TODO: dont render extra spaces in new lines */ }}
+	{{ /**/ }}
 	{{ /* this should not be printed */ }}
 	{{/* this should not be printed */
 y := "y"

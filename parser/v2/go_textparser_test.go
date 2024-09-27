@@ -59,8 +59,8 @@ func TestGoTextParser(t *testing.T) {
 					From: Position{Index: 0, Line: 0, Col: 0},
 					To:   Position{Index: 6, Line: 0, Col: 6},
 				},
-				LeadingSpaceLit: "",
-				TrailingSpace:   "\n",
+				TrailingSpace:    "\n",
+				TrailingSpaceLit: "\n  ",
 			},
 		},
 		{
@@ -68,13 +68,13 @@ func TestGoTextParser(t *testing.T) {
 			input: "\t  Line 1\n    Line 2",
 			expected: Text{
 				GoTempl: true,
-				Value:   "Line 1",
+				Value:   "\t  Line 1",
 				Range: Range{
 					From: Position{Index: 0, Line: 0, Col: 0},
 					To:   Position{Index: 9, Line: 0, Col: 9},
 				},
-				LeadingSpaceLit: "\t  ",
-				TrailingSpace:   "\n",
+				TrailingSpace:    "\n",
+				TrailingSpaceLit: "\n    ",
 			},
 		},
 		{
@@ -87,8 +87,8 @@ func TestGoTextParser(t *testing.T) {
 					From: Position{Index: 0, Line: 0, Col: 0},
 					To:   Position{Index: 6, Line: 0, Col: 6},
 				},
-				LeadingSpaceLit: "",
-				TrailingSpace:   "\n",
+				TrailingSpace:    "\n",
+				TrailingSpaceLit: "\r\n",
 			},
 		},
 	}

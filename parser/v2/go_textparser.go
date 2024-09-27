@@ -1,26 +1,16 @@
 package parser
 
 import (
-	"fmt"
-	"os"
-	"strconv"
-
 	"github.com/a-h/parse"
 )
 
-var untilGoTemplOrNewLine = parse.StringUntil(parse.Any(parse.String("{{"), openGotemplStringExpr, parse.String("\r\n"), parse.Rune('\n')))
+var untilGoTemplOrNewLine = parse.StringUntil(parse.Any(parse.String("{{"), openGotemplStringExpr, parse.NewLine))
 
 var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	// src, _ := pi.Peek(-1)
 	from := pi.Position()
 
 	t := Text{GoTempl: true}
-	if t.LeadingSpaceLit, _, err = parse.OptionalWhitespace.Parse(pi); err != nil {
-		pi.Seek(from.Index)
-		return
-	}
-	fmt.Fprintf(os.Stderr, "t.LeadingSpaceLit: %s\n", strconv.Quote(t.LeadingSpaceLit))
-	// Read until a templ expression opens or line ends.
 
 	if t.Value, ok, err = untilGoTemplOrNewLine.Parse(pi); err != nil || !ok {
 		pi.Seek(from.Index)

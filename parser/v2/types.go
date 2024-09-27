@@ -444,7 +444,6 @@ type Text struct {
 	Value string
 	// TrailingSpace lists what happens after the text.
 	TrailingSpace    TrailingSpace
-	LeadingSpaceLit  string
 	TrailingSpaceLit string
 	GoTempl          bool
 }
@@ -454,13 +453,13 @@ func (t Text) Trailing() TrailingSpace {
 }
 
 func (t Text) String() string {
-	return fmt.Sprintf("Text([%s]%s[%s])", strconv.Quote(t.LeadingSpaceLit), t.Value, strconv.Quote(t.TrailingSpaceLit))
+	return fmt.Sprintf("Text(%s[%s])", t.Value, strconv.Quote(t.TrailingSpaceLit))
 }
 
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
 	if t.GoTempl { // leave as is since we are not removing whitespace with gotempl.
-		_, err := io.WriteString(w, t.LeadingSpaceLit+t.Value+t.TrailingSpaceLit)
+		_, err := io.WriteString(w, t.Value+t.TrailingSpaceLit)
 		return err
 	}
 	return writeIndent(w, indent, t.Value)
@@ -1277,6 +1276,88 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 		return err
 	}
 	if err := writeIndent(w, indent, "}"); err != nil {
+		return err
+	}
+	return nil
+}
+
+// {{ if p.Type == "test" && p.thing }}
+//
+//	println(var)
+//
+// {{ end }}
+type GoIfExpression struct {
+	Expression Expression
+	Then       []Node
+	ElseIfs    []GoElseIfExpression
+	Else       []Node
+}
+
+type GoElseIfExpression struct {
+	Expression Expression
+	Then       []Node
+}
+
+func (n GoIfExpression) ChildNodes() []Node {
+	var nodes []Node
+	nodes = append(nodes, n.Then...)
+	nodes = append(nodes, n.Else...)
+	for _, elseIf := range n.ElseIfs {
+		nodes = append(nodes, elseIf.Then...)
+	}
+	return nodes
+}
+
+func (ie GoIfExpression) IsNode() bool { return true }
+
+func (ie GoIfExpression) Write(w io.Writer, indent int) error {
+	if err := writeIndent(w, indent, "{{ if ", ie.Expression.Value, " }}\n"); err != nil {
+		return err
+	}
+	if err := writeNodesIndented(w, indent+1, ie.Then); err != nil {
+		return err
+	}
+	for _, elif := range ie.ElseIfs {
+		if err := elif.Write(w, indent); err != nil {
+			return err
+		}
+	}
+	if len(ie.Else) > 0 {
+		if err := writeIndent(w, indent, "{{ else }}\n"); err != nil {
+			return err
+		}
+		if err := writeNodesIndented(w, indent+1, ie.Else); err != nil {
+			return err
+		}
+	}
+	if err := writeIndent(w, indent, "{{ end }}"); err != nil {
+		return err
+	}
+	return nil
+}
+
+// {{ for i, v := range p.Addresses }}
+//
+//	{! Address(v) }
+//
+// {{ end }}
+type GoForExpression struct {
+	Expression Expression
+	Children   []Node
+}
+
+func (fe GoForExpression) ChildNodes() []Node {
+	return fe.Children
+}
+func (fe GoForExpression) IsNode() bool { return true }
+func (fe GoForExpression) Write(w io.Writer, indent int) error {
+	if err := writeIndent(w, indent, " {{ for ", fe.Expression.Value, " }}\n"); err != nil {
+		return err
+	}
+	if err := writeNodesIndented(w, indent+1, fe.Children); err != nil {
+		return err
+	}
+	if err := writeIndent(w, indent, "{{ end }}"); err != nil {
 		return err
 	}
 	return nil

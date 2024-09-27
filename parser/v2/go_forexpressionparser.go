@@ -1,38 +1,9 @@
 package parser
 
 import (
-	"io"
-
 	"github.com/a-h/parse"
 	"github.com/a-h/templ/parser/v2/goexpression"
 )
-
-// {{ for i, v := range p.Addresses }}
-//
-//	{! Address(v) }
-//
-// {{ end }}
-type GoForExpression struct {
-	Expression Expression
-	Children   []Node
-}
-
-func (fe GoForExpression) ChildNodes() []Node {
-	return fe.Children
-}
-func (fe GoForExpression) IsNode() bool { return true }
-func (fe GoForExpression) Write(w io.Writer, indent int) error {
-	if err := writeIndent(w, indent, " {{ for ", fe.Expression.Value, " }}\n"); err != nil {
-		return err
-	}
-	if err := writeNodesIndented(w, indent+1, fe.Children); err != nil {
-		return err
-	}
-	if err := writeIndent(w, indent, "{{ end }}"); err != nil {
-		return err
-	}
-	return nil
-}
 
 var goForExpression parse.Parser[Node] = goForExpressionParser{}
 

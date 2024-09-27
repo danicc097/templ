@@ -45,12 +45,13 @@ func Package() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("/*\n  Package testgousage.\n  */\n  package testgousage\n  // A comment that should be rendered\n  /* Another comment that should be rendered\n  */\n")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("/*\n Package testgousage.\n */\n package testgousage\n // A comment that should be rendered\n /* Another comment that should be rendered\n */\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		/* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */
 		/* TODO: dont render extra spaces in new lines */
+		/**/
 		/* this should not be printed */
 		/* this should not be printed */
 		y := "y"
@@ -62,20 +63,20 @@ func Package() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("var")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 35, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 37, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" with space\n  // comment with")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" with space\n // comment with")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("var")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 36, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 38, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -88,7 +89,7 @@ func Package() templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("const _ab = ")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 37, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 39, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -104,7 +105,7 @@ func Package() templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 41, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 43, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -114,7 +115,7 @@ func Package() templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// nested %d\n", j))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 43, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 45, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
@@ -126,7 +127,7 @@ func Package() templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("var abc = \"abc\"\n")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 47, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 49, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -140,7 +141,7 @@ func Package() templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("should never print this")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 49, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 51, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
@@ -154,7 +155,7 @@ func Package() templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("should never print this either")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 51, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 53, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 			if templ_7745c5c3_Err != nil {
@@ -165,7 +166,7 @@ func Package() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("// FIXME: should respect indent for Text nodes inside gotempl.\n  // we will apply gofumpt to output anyway\n  func main() {\n  const z = \"z\"\n  for i := 0; i < 3; i++ { println(\"z\") }\n  for i := 0; i < 3; i++ {\n  println(\"z\")\n  }\n  }\n")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("// FIXME: should respect indent for Text nodes inside gotempl.\n // we will apply gofumpt to output anyway\n func main() {\n const z = \"z\"\n for i := 0; i < 3; i++ { println(\"z\") }\n for i := 0; i < 3; i++ {\n println(\"z\")\n }\n }\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

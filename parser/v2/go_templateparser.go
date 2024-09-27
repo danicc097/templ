@@ -122,6 +122,12 @@ type gotemplateNodeParser[TUntil any] struct {
 
 var gotemplateNodeSkipParsers = []parse.Parser[Node]{}
 
+var goTemplCommentEnd = parse.All(
+	parse.OptionalWhitespace,
+	parse.String("}}"),
+	parse.NewLine,
+)
+
 // {{ end }}
 var goTemplExpressionEnd = parse.All(
 	parse.OptionalWhitespace,
@@ -152,7 +158,7 @@ var gotemplateNodeParsers = [...]parse.Parser[Node]{
 	// templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	// childrenExpression,     // { children... }
 	gowhitespaceExpression,
-	goCode,       // {{ myval := x.myval }}
+	gogoCode,     // {{ myval := x.myval }}
 	gotextParser, // match anything, assume they're valid go code fragments
 }
 

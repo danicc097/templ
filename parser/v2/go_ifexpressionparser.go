@@ -4,69 +4,13 @@ import (
 	"io"
 
 	"github.com/a-h/parse"
-	"github.com/a-h/templ/parser/v2/goexpression"
 )
-
-// {{ if p.Type == "test" && p.thing }}
-//
-//	println(var)
-//
-// {{ end }}
-type GoIfExpression struct {
-	Expression Expression
-	Then       []Node
-	ElseIfs    []GoElseIfExpression
-	Else       []Node
-}
-
-type GoElseIfExpression struct {
-	Expression Expression
-	Then       []Node
-}
-
-func (n GoIfExpression) ChildNodes() []Node {
-	var nodes []Node
-	nodes = append(nodes, n.Then...)
-	nodes = append(nodes, n.Else...)
-	for _, elseIf := range n.ElseIfs {
-		nodes = append(nodes, elseIf.Then...)
-	}
-	return nodes
-}
-
-func (ie GoIfExpression) IsNode() bool { return true }
-
-func (ie GoIfExpression) Write(w io.Writer, indent int) error {
-	if err := writeIndent(w, indent, "{{ if ", ie.Expression.Value, " }}\n"); err != nil {
-		return err
-	}
-	if err := writeNodesIndented(w, indent+1, ie.Then); err != nil {
-		return err
-	}
-	for _, elif := range ie.ElseIfs {
-		if err := elif.Write(w, indent); err != nil {
-			return err
-		}
-	}
-	if len(ie.Else) > 0 {
-		if err := writeIndent(w, indent, "{{ else }}\n"); err != nil {
-			return err
-		}
-		if err := writeNodesIndented(w, indent+1, ie.Else); err != nil {
-			return err
-		}
-	}
-	if err := writeIndent(w, indent, "{{ end }}"); err != nil {
-		return err
-	}
-	return nil
-}
 
 // until {{ else if, {{ else or {{ end }}
 var (
-	gountilElseIfElseOrEnd = parse.Any(StripType(goelseIfExpression), StripType(goelseExpression), StripType(goTemplExpressionEnd))
-	goIfBlockEnd           = parse.All(parse.OptionalWhitespace, parse.String("}}"), parse.NewLine)
-	gountilIfBlockEnd      = parse.StringUntil(goIfBlockEnd)
+	goElseIfElseOrEnd = parse.Any(StripType(goelseIfExpression), StripType(goelseExpression), StripType(goTemplExpressionEnd))
+	goIfBlockEnd      = parse.All(parse.OptionalWhitespace, parse.String("}}"), parse.NewLine)
+	gountilIfBlockEnd = parse.StringUntil(goIfBlockEnd)
 )
 
 var goIfExpression parse.Parser[Node] = goIfExpressionParser{}
@@ -90,7 +34,7 @@ func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) 
 		return r, false, nil
 	}
 
-	if r.Expression, err = parseGotemplGo("if", pi, goexpression.If); err != nil {
+	if r.Expression, err = parseGotemplIf("if", pi); err != nil {
 		return r, false, err
 	}
 	r.Expression.GoTempl = true
@@ -102,7 +46,7 @@ func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) 
 	}
 
 	// we may also have nested {{ if ... }} ... {{ end }} and we want to stop at the first elseif/else/end found after parsing those nodes
-	np := newGoTemplateNodeParser(gountilElseIfElseOrEnd, "else expression or closing {{end}}")
+	np := newGoTemplateNodeParser(goElseIfElseOrEnd, "else expression or closing {{end}}")
 	var thenNodes Nodes
 	if thenNodes, ok, err = np.Parse(pi); err != nil || !ok {
 		err = parse.Error("if: expected nodes, but none were found", pi.Position())
@@ -149,7 +93,7 @@ func (goelseIfExpressionParser) Parse(pi *parse.Input) (r GoElseIfExpression, ok
 		return r, false, nil
 	}
 
-	if r.Expression, err = parseGotemplGo("else if", pi, goexpression.If); err != nil {
+	if r.Expression, err = parseGotemplIf("else if", pi); err != nil {
 		return r, false, err
 	}
 	r.Expression.GoTempl = true
@@ -160,7 +104,7 @@ func (goelseIfExpressionParser) Parse(pi *parse.Input) (r GoElseIfExpression, ok
 	}
 
 	// same possibility as if
-	np := newGoTemplateNodeParser(gountilElseIfElseOrEnd, "else expression or closing brace")
+	np := newGoTemplateNodeParser(goElseIfElseOrEnd, "else expression or closing brace")
 	var thenNodes Nodes
 	if thenNodes, ok, err = np.Parse(pi); err != nil || !ok {
 		err = parse.Error("else if: expected nodes, but none were found", pi.Position())
