@@ -1,0 +1,28 @@
+-- in --
+package testgousage
+
+import "fmt"
+
+gotempl Package() {
+	func main() {
+		const z = "z"
+		for i := 0; i < 3; i++ { println("z") }
+		for i := 0; i < 3; i++ {
+			println("z")
+		}
+	}
+}
+-- out --
+package testgousage
+
+import "fmt"
+
+gotempl Package() {
+	func main() {
+		const z = "z"
+		for i := 0; i < 3; i++ { println("z") }
+		for i := 0; i < 3; i++ {
+			println("z")
+		}
+	}
+}

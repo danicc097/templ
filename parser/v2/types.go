@@ -458,6 +458,8 @@ func (t Text) String() string {
 
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
+	// TODO: keep leading space after `gotempl () {\n` and ` {{ end }}\n`
+	// if text comes next.
 	if t.GoTempl { // leave as is since we are not removing whitespace with gotempl.
 		_, err := io.WriteString(w, t.Value+t.TrailingSpaceLit)
 		return err

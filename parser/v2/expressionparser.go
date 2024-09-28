@@ -32,6 +32,10 @@ var (
 	openBrace      = parse.String("{")
 	optionalSpaces = parse.StringFrom(parse.Optional(
 		parse.AtLeast(1, parse.Rune(' '))))
+	optionalSpacesOrNewlines = parse.StringFrom(
+		parse.Optional(parse.AtLeast(1, parse.Rune(' '))),
+		parse.Optional(parse.AtLeast(1, parse.NewLine)),
+	)
 )
 
 var openBraceWithPadding = parse.StringFrom(optionalSpaces,
@@ -42,10 +46,9 @@ var openBraceWithOptionalPadding = parse.Any(openBraceWithPadding, openBrace)
 var (
 	closeBrace                    = parse.String("}")
 	closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
-	// TODO: for gotempl we need to match } if its the last one, ie until exactly "}\n\n" or "}\n*EOF"
+	// in gotempl we have go code as text that interferes with template def brackets
 	lastCloseBraceWithOptionalPadding = parse.Any(
-		parse.StringFrom(optionalSpaces, closeBrace, parse.NewLine, parse.EOF[string]()),
-		// now match } and two newlines
+		parse.StringFrom(optionalSpaces, closeBrace, optionalSpacesOrNewlines, parse.EOF[string]()),
 		parse.StringFrom(optionalSpaces, closeBrace, parse.NewLine, parse.NewLine),
 	)
 )
