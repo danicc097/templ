@@ -19,6 +19,7 @@ func TestGoGoCodeParser(t *testing.T) {
 			name:  "basic expression",
 			input: `{{ p := "this" }}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: `p := "this"`,
 					Range: Range{
@@ -40,6 +41,7 @@ func TestGoGoCodeParser(t *testing.T) {
 			name:  "basic expression, no space",
 			input: `{{p:="this"}}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: `p:="this"`,
 					Range: Range{
@@ -65,6 +67,7 @@ func TestGoGoCodeParser(t *testing.T) {
 				}
 			}}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: `p := func() {
 					dosomething()
@@ -95,6 +98,7 @@ func TestGoGoCodeParser(t *testing.T) {
 	// Comment at end of expression.
 }}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: `/* Comment at the start of expression. */
 	one := "one"
@@ -115,6 +119,7 @@ func TestGoGoCodeParser(t *testing.T) {
 			name:  "line comments in expression 1",
 			input: `{{ // Comment only }}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: "// Comment only",
 					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
@@ -130,6 +135,7 @@ func TestGoGoCodeParser(t *testing.T) {
 				// Comment only
 				}}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: "// Comment only",
 					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 18, Line: 0, Col: 18}},
@@ -143,6 +149,7 @@ func TestGoGoCodeParser(t *testing.T) {
 			name:  "block comments in expression 1",
 			input: `{{ /* Comment only */ }}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: "/* Comment only */",
 					Range: Range{From: Position{Index: 3, Line: 0, Col: 3}, To: Position{Index: 21, Line: 0, Col: 21}},
@@ -156,6 +163,7 @@ func TestGoGoCodeParser(t *testing.T) {
 			input: `{{ /* Comment only
 				*/ }}`,
 			expected: GoCode{
+				GoTempl: true,
 				Expression: Expression{
 					Value: `/* Comment only
 				*/`,

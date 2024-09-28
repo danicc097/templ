@@ -1168,6 +1168,7 @@ type GoCode struct {
 	// TrailingSpace lists what happens after the expression.
 	TrailingSpace TrailingSpace
 	Multiline     bool
+	GoTempl       bool
 }
 
 func (gc GoCode) Trailing() TrailingSpace {
@@ -1183,6 +1184,13 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 	if err != nil {
 		source = []byte(gc.Expression.Value)
 	}
+
+	if gc.GoTempl {
+		// TODO: only if line does not start with whitespace + `{{`, else indent
+		err := writeIndent(w, indent, `{{ `+gc.Expression.Value+` }}`)
+		return err
+	}
+
 	if !gc.Multiline {
 		return writeIndent(w, indent, `{{ `, string(source), ` }}`)
 	}
@@ -1198,7 +1206,7 @@ type StringExpression struct {
 	Expression Expression
 	// TrailingSpace lists what happens after the expression.
 	TrailingSpace TrailingSpace
-	Gotempl       bool
+	GoTempl       bool
 }
 
 func (se StringExpression) Trailing() TrailingSpace {
@@ -1207,12 +1215,18 @@ func (se StringExpression) Trailing() TrailingSpace {
 
 func (se StringExpression) IsNode() bool                  { return true }
 func (se StringExpression) IsStyleDeclarationValue() bool { return true }
-func (se StringExpression) Write(w io.Writer, indent int) error {
+func (se StringExpression) Write(w io.Writer, indent int) (err error) {
 	if isWhitespace(se.Expression.Value) {
 		se.Expression.Value = ""
 	}
-	if se.Gotempl {
-		return writeIndent(w, indent, `%{ `, se.Expression.Value, ` }%`)
+	if se.GoTempl {
+		// only write indent if not inlined, else we get \t on every save
+		if se.TrailingSpace != SpaceVertical {
+			_, err = io.WriteString(w, `%{ `+se.Expression.Value+` }%`)
+		} else {
+			err = writeIndent(w, indent, `%{ `+se.Expression.Value+` }%`)
+		}
+		return
 	}
 	return writeIndent(w, indent, `{ `, se.Expression.Value, ` }`)
 }

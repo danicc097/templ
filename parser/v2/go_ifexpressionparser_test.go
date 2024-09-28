@@ -47,7 +47,7 @@ func TestGoIfExpression(t *testing.T) {
 							GoTempl: true,
 						},
 						TrailingSpace: "\n",
-						Gotempl:       true,
+						GoTempl:       true,
 					},
 				},
 			},
@@ -79,6 +79,7 @@ func TestGoIfExpression(t *testing.T) {
 				Then: []Node{
 					Whitespace{Value: "\t", GoTempl: true},
 					GoCode{
+						GoTempl: true,
 						Expression: Expression{
 							Value: `"A"`,
 							Range: Range{
@@ -92,6 +93,7 @@ func TestGoIfExpression(t *testing.T) {
 				Else: []Node{
 					Whitespace{Value: "\n\t", GoTempl: true},
 					GoCode{
+						GoTempl: true,
 						Expression: Expression{
 							Value: `"B"`,
 							Range: Range{
@@ -131,6 +133,7 @@ func TestGoIfExpression(t *testing.T) {
 				Then: []Node{
 					Whitespace{Value: "\t", GoTempl: true},
 					GoCode{
+						GoTempl: true,
 						Expression: Expression{
 							Value: `"A"`,
 							Range: Range{
@@ -154,6 +157,7 @@ func TestGoIfExpression(t *testing.T) {
 						Then: []Node{
 							Whitespace{Value: "\t", GoTempl: true},
 							GoCode{
+								GoTempl: true,
 								Expression: Expression{
 									Value: `"B"`,
 									Range: Range{
@@ -232,6 +236,7 @@ func TestGoIfExpression(t *testing.T) {
 				Then: []Node{
 					Whitespace{Value: "\t", GoTempl: true},
 					GoCode{
+						GoTempl: true,
 						Expression: Expression{
 							Value: `"A"`,
 							Range: Range{
@@ -245,6 +250,7 @@ func TestGoIfExpression(t *testing.T) {
 				Else: []Node{
 					Whitespace{Value: "\n\t", GoTempl: true},
 					GoCode{
+						GoTempl: true,
 						Expression: Expression{
 							Value: `"B"`,
 							Range: Range{
@@ -302,6 +308,7 @@ func TestGoIfExpression(t *testing.T) {
 						Then: []Node{
 							Whitespace{Value: "\t\t\t\t\t\t", GoTempl: true},
 							GoCode{
+								GoTempl: true,
 								Expression: Expression{
 									Value: `"C"`,
 									Range: Range{

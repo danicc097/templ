@@ -24,6 +24,7 @@ var gogoCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	}
 	pi.Seek(start1)
 	var r GoCode
+	r.GoTempl = true
 	pi2 := parse.NewInput(src)
 	ws, _, _ := parse.OptionalWhitespace.Parse(pi)
 	commentStartPos := pi2.Position()

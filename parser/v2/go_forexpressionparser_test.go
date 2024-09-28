@@ -38,7 +38,7 @@ func TestForExpressionParser_Go(t *testing.T) {
 				Children: []Node{
 					Whitespace{Value: "\n\t\t\t\t\t", GoTempl: true},
 					StringExpression{
-						Gotempl: true,
+						GoTempl: true,
 						Expression: Expression{
 							GoTempl: true, Value: "item", Range: Range{
 								From: Position{Index: 43, Line: 1, Col: 8},
@@ -71,7 +71,7 @@ func TestForExpressionParser_Go(t *testing.T) {
 					},
 				}, Children: []Node{
 					StringExpression{
-						Gotempl: true,
+						GoTempl: true,
 						Expression: Expression{
 							GoTempl: true, Value: "item", Range: Range{
 								From: Position{Index: 36, Line: 0, Col: 36},

@@ -17,21 +17,17 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 	}
 
 	// Once we have a prefix, we must have an expression that returns a string, with optional err.
-	r := StringExpression{Gotempl: true}
+	r := StringExpression{GoTempl: true}
 	if r.Expression, err = parseGoSliceArgs(pi, "}%"); err != nil || !ok {
 		pi.Seek(start) // not an expression that returns a string, might be just text.
 		return r, false, err
 	}
 	r.Expression.GoTempl = true
 
-	// Clear any optional whitespace.
-	_, _, _ = parse.OptionalWhitespace.Parse(pi)
-
 	if _, ok, err = closeGotemplStringExprWithOptionalPadding.Parse(pi); err != nil || !ok {
 		pi.Seek(start) // not an expression that returns a string, might be just text.
 		return
 	}
-
 	// Parse trailing whitespace.
 	ws, _, err := parse.Whitespace.Parse(pi)
 	if err != nil {
@@ -41,6 +37,5 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 	if err != nil {
 		return r, false, err
 	}
-
 	return r, true, nil
 })
