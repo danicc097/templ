@@ -166,7 +166,7 @@ func Package() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("// FIXME: should respect indent for Text nodes inside gotempl.\n // we will apply gofumpt to output anyway\n func main() {\n const z = \"z\"\n for i := 0; i < 3; i++ { println(\"z\") }\n for i := 0; i < 3; i++ {\n println(\"z\")\n }\n }\n")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("// FIXME: should respect indent for Text nodes inside gotempl.\n // we will apply gofumpt to output anyway\n func main() {\n const z = \"z\"\n for i := 0; i < 3; i++ { println(\"z\") }\n for i := 0; i < 3; i++ {\n println(\"z\")\n }\n }\n type A struct {\n a string\n }\n")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

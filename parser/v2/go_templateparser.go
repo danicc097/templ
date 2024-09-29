@@ -29,7 +29,7 @@ var gotemplate = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, err er
 	// Once we're in a gotemplate, we should expect some gotemplate whitespace, if/switch/for,
 	// or node string expressions etc.
 	var nodes Nodes
-	nodes, ok, err = newGoTemplateNodeParser(lastCloseBraceWithOptionalPadding, "gotemplate closing brace").Parse(pi)
+	nodes, ok, err = newGoTemplateNodeParser(gotemplLastCloseBraceWithOptionalPadding, fmt.Sprintf("gotempl closing brace %q", gotemplCloseBraceString)).Parse(pi)
 	if err != nil {
 		return
 	}
@@ -46,8 +46,8 @@ var gotemplate = parse.Func(func(pi *parse.Input) (r GoTemplate, ok bool, err er
 	}
 
 	// Try for }
-	if _, ok, err = closeBraceWithOptionalPadding.Parse(pi); err != nil || !ok {
-		err = parse.Error("gotemplate: missing closing brace", pi.Position())
+	if _, ok, err = gotemplLastCloseBraceWithOptionalPadding.Parse(pi); err != nil || !ok {
+		err = parse.Error("gotempl: missing closing brace", pi.Position())
 		return
 	}
 
@@ -121,6 +121,12 @@ type gotemplateNodeParser[TUntil any] struct {
 }
 
 var gotemplateNodeSkipParsers = []parse.Parser[Node]{}
+
+var goTemplCommentStart = parse.All(
+	parse.NewLine,
+	parse.String("{{"),
+	parse.OptionalWhitespace,
+)
 
 var goTemplCommentEnd = parse.All(
 	parse.OptionalWhitespace,

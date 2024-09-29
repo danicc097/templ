@@ -1313,7 +1313,7 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
 		return err
 	}
-	if err := writeIndent(w, indent, "}"); err != nil {
+	if err := writeIndent(w, indent, gotemplCloseBraceString); err != nil {
 		return err
 	}
 	return nil

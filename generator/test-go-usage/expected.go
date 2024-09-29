@@ -35,3 +35,7 @@ func main() {
 		println("z")
 	}
 }
+
+type A struct {
+	a string
+}

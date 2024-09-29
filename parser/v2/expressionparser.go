@@ -43,13 +43,16 @@ var openBraceWithPadding = parse.StringFrom(optionalSpaces,
 	optionalSpaces)
 var openBraceWithOptionalPadding = parse.Any(openBraceWithPadding, openBrace)
 
+const gotemplCloseBraceString = "}#"
+
 var (
 	closeBrace                    = parse.String("}")
+	gotemplCloseBrace             = parse.String(gotemplCloseBraceString)
 	closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
 	// in gotempl we have go code as text that interferes with template def brackets
-	lastCloseBraceWithOptionalPadding = parse.Any(
-		parse.StringFrom(optionalSpaces, closeBrace, optionalSpacesOrNewlines, parse.EOF[string]()),
-		parse.StringFrom(optionalSpaces, closeBrace, parse.NewLine, parse.NewLine),
+	gotemplLastCloseBraceWithOptionalPadding = parse.Any(
+		parse.StringFrom(optionalSpaces, gotemplCloseBrace, optionalSpacesOrNewlines, parse.EOF[string]()),
+		parse.StringFrom(optionalSpaces, gotemplCloseBrace, parse.NewLine, parse.NewLine),
 	)
 )
 
