@@ -18,7 +18,7 @@ can adopt the same in gotempl expressions for consistency
 */
 
 gotempl Package(paramA string, paramB int) #{
-  /*
+	/*
   Package testgousage.
   */
   package testgousage
@@ -33,7 +33,7 @@ gotempl Package(paramA string, paramB int) #{
 	{{ /* this should not be printed */
   y := "y" }}
 	{{ _ = paramA }}
-  // comment with %{ "var" }% with space
+	// comment with %{ "var" }% with space
   // comment with%{ "var" }%without space
 	%{ "const _ab = " }% "ab"
 	{{ first := items[0] }}
@@ -51,7 +51,7 @@ gotempl Package(paramA string, paramB int) #{
 	{{ else }}
 		%{ "should never print this either" }%
 	{{ end }}
-  // FIXME: should respect indent for Text nodes inside gotempl.
+	// FIXME: should respect indent for Text nodes inside gotempl.
   // we will apply gofumpt to output anyway
   func main() {
     const z = "z"

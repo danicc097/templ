@@ -653,7 +653,6 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 				continue
 			}
 			if !isWhitespace && prevIsWhitespace && nextIsText && nt.GoTempl {
-				// print current node:
 			}
 		}
 		if isWhitespace || nodes[i] == nil {
@@ -663,10 +662,11 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 		if isText && text.GoTempl {
 			skipTrailing = true
 
-			if !prevIsText && !nextIsText {
+			if !prevIsText && !nextIsText && text.TrailingSpace != SpaceVertical {
+				skipTrailing = false
 				// TODO: this requires IsInline for nodes so we only indent when prev is !IsInline
-				// fmt.Fprintf(w, "text.Value: [[%s]]\n", strconv.Quote(text.Value))
-				// io.WriteString(w, "aaaaa\t") // TODO: depends on inlined gotempl expressions as well
+				// fmt.Fprintf(w, "[[%s]](%t)\n", strconv.Quote(text.Value), nextIsWhitespace)
+				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
 			}
 		}
 

@@ -63,7 +63,7 @@ func Package(paramA string, paramB int) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("var")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 36, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 36, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
