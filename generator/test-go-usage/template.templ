@@ -17,6 +17,22 @@ rawgo syntax in base templ not experimental anymore.
 can adopt the same in gotempl expressions for consistency
 */
 
+gotempl Fields() #{
+	{{ for _, i := range []string{"a", "b", "c"} }}
+		%{ fmt.Sprintf("%s string \n", i) }%
+	{{ end }}
+}#
+
+gotempl JoinWith(sep string, items []string) #{
+	{{ for _, i := range items }}
+		{{ if i != items[len(items)-1] }}
+			%{ fmt.Sprintf("%s%s", i, sep) }%
+		{{ else }}
+			%{ i }%
+		{{ end }}
+	{{ end }}
+}#
+
 gotempl Package(paramA string, paramB int) #{
 	/*
   Package testgousage.
@@ -61,9 +77,14 @@ gotempl Package(paramA string, paramB int) #{
     }
   }
 
-  type A struct {
-    a string
-  }
+  /* FIXME: @... not being called in line/block comment
+   * Fields: @JoinWith(", ", []string{"a", "b", "c"})
+   @JoinWith(", ", []string{"a", "b", "c"})
+	**/
+  // Fields: @JoinWith(", ", []string{"a", "b", "c"})
+	type A struct {
+    @Fields()
+	}
 }#
 
 // Combine all tests.

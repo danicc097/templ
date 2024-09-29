@@ -1,10 +1,6 @@
 package parser
 
 import (
-	"fmt"
-	"os"
-	"strconv"
-
 	"github.com/a-h/parse"
 )
 
@@ -13,8 +9,6 @@ var untilGoTemplOrNewLine = parse.StringUntil(parse.Any(parse.String("{{"), open
 var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	// src, _ := pi.Peek(-1)
 	from := pi.Position()
-	src, _ := pi.Peek(-1)
-	fmt.Fprintf(os.Stderr, "gotextParser: %v\n", strconv.Quote(string(src)))
 	t := Text{GoTempl: true}
 
 	if t.Value, ok, err = untilGoTemplOrNewLine.Parse(pi); err != nil || !ok {

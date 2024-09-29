@@ -163,9 +163,13 @@ var gotemplateNodeParsers = [...]parse.Parser[Node]{
 	// callTemplateExpression, // {! TemplateName(a, b, c) }
 	// templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	// childrenExpression,     // { children... }
+
+	callTemplateExpression, // {! TemplateName(a, b, c) }
+	templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	gowhitespaceExpression,
 	gogoCode,     // {{ myval := x.myval }}
 	gotextParser, // match anything, assume they're valid go code fragments
+
 }
 
 func (p gotemplateNodeParser[T]) Parse(pi *parse.Input) (op Nodes, ok bool, err error) {

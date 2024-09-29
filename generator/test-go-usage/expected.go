@@ -36,6 +36,12 @@ func main() {
 	}
 }
 
+/* FIXME: @... not being called in line/block comment
+ * Fields: @JoinWith(", ", []string{"a", "b", "c"})
+a, b, c**/
+// Fields: @JoinWith(", ", []string{"a", "b", "c"})
 type A struct {
 	a string
+	b string
+	c string
 }
