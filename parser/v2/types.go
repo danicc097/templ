@@ -417,6 +417,8 @@ type Nodes struct {
 // A Node appears within a template, e.g. an StringExpression, Element, IfExpression etc.
 type Node interface {
 	IsNode() bool
+	// TODO: might be needed for proper gotext formatting in gotempl.
+	// IsInline() bool
 	// Write out the string.
 	Write(w io.Writer, indent int) error
 }
@@ -627,40 +629,55 @@ func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
 
 func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 	startLevel := level
-	var skipTrailing bool
+	var skipTrailing, prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
+	_ = nextIsWhitespace
+	var pt, nt Text
+
 	for i := 0; i < len(nodes); i++ {
 		_, isWhitespace := nodes[i].(Whitespace)
+		text, isText := nodes[i].(Text)
 
 		if i > 0 {
-			if t, prevIsText := nodes[i-1].(Text); prevIsText && t.GoTempl {
+			_, prevIsWhitespace = nodes[i-1].(Whitespace)
+			if pt, prevIsText = nodes[i-1].(Text); prevIsText && pt.GoTempl {
 				// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
 				level = 0
 			}
 		}
 
 		if i+1 < len(nodes) {
-			t, nextIsText := nodes[i+1].(Text)
-			if isWhitespace && nextIsText && t.GoTempl { // add leading space (text only captures trailing)
-				if err := nodes[i].Write(w, level); err != nil {
-					return err
-				}
+			_, nextIsWhitespace = nodes[i+1].(Whitespace)
+			nt, nextIsText = nodes[i+1].(Text)
+			if isWhitespace && nextIsText && nt.GoTempl { // add leading space (text only captures trailing)
+				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
 				continue
 			}
-			// if nextIsText {
-			// 	skipTrailing = true
-			// }
+			if !isWhitespace && prevIsWhitespace && nextIsText && nt.GoTempl {
+				// print current node:
+			}
 		}
 		if isWhitespace || nodes[i] == nil {
 			continue
 		}
+
+		if isText && text.GoTempl {
+			skipTrailing = true
+
+			if !prevIsText && !nextIsText {
+				// TODO: this requires IsInline for nodes so we only indent when prev is !IsInline
+				// fmt.Fprintf(w, "text.Value: [[%s]]\n", strconv.Quote(text.Value))
+				// io.WriteString(w, "aaaaa\t") // TODO: depends on inlined gotempl expressions as well
+			}
+		}
+
 		if err := nodes[i].Write(w, level); err != nil {
 			return err
 		}
 
-		if t, ok := nodes[i].(Text); ok && t.GoTempl {
-			skipTrailing = true
+		if isWhitespace && (nextIsText && nt.GoTempl) {
+			io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
+			continue
 		}
-
 		if skipTrailing {
 			skipTrailing = false
 			continue
