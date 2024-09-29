@@ -35,6 +35,7 @@ func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) 
 	}
 
 	if r.Expression, err = parseGotemplIf("if", pi); err != nil {
+		pi.Seek(start)
 		return r, false, err
 	}
 	r.Expression.GoTempl = true

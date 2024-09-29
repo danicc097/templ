@@ -22,7 +22,7 @@ gotempl Package() {
   Package testgousage.
   */
   package testgousage
-  
+
   // A comment that should be rendered
   /* Another comment that should be rendered
   */
@@ -30,27 +30,26 @@ gotempl Package() {
 	{{ /* TODO: dont render extra spaces in new lines */ }}
 	{{ /**/ }}
 	{{ /* this should not be printed */ }}
-	{{/* this should not be printed */
-y := "y"
-/**/
-	}}
-// comment with %{ "var" }% with space
-// comment with%{ "var" }%without space
+	{{ /* this should not be printed */
+  y := "y" }}
+	{{ _ = "a" }}
+  // comment with %{ "var" }% with space
+  // comment with%{ "var" }%without space
 	%{ "const _ab = " }% "ab"
 	{{ first := items[0] }}
-	 {{ for _, i := range items }}
+	{{ for _, i := range items }}
 		{{ /* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */ }}
 		%{ fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y) }%
-		 {{ for _, j := range items }}
+		{{ for _, j := range items }}
 			%{ fmt.Sprintf("// nested %d\n", j) }%
 		{{ end }}
 	{{ end }}
 	{{ if true }}
 		%{ "var abc = \"abc\"\n" }%
-  {{ else if first == 999 }}
-    %{ "should never print this" }%
-  {{ else }}
-    %{ "should never print this either" }%
+	{{ else if first == 999 }}
+		%{ "should never print this" }%
+	{{ else }}
+		%{ "should never print this either" }%
 	{{ end }}
   // FIXME: should respect indent for Text nodes inside gotempl.
   // we will apply gofumpt to output anyway

@@ -458,8 +458,10 @@ func (t Text) String() string {
 
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
-	// TODO: keep leading space after `gotempl () {\n` and ` {{ end }}\n`
+	// FIXME: keep leading space after `gotempl () {\n` and ` {{ end }}\n`
 	// if text comes next.
+	// go template parser already leaves trailing space after `gotempl () {\n`
+	// Whitespace parser parses it, but not printed later.
 	if t.GoTempl { // leave as is since we are not removing whitespace with gotempl.
 		_, err := io.WriteString(w, t.Value+t.TrailingSpaceLit)
 		return err
@@ -625,14 +627,30 @@ func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
 
 func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 	startLevel := level
+	var skipTrailing bool
 	for i := 0; i < len(nodes); i++ {
 		_, isWhitespace := nodes[i].(Whitespace)
 
-		// Skip whitespace nodes.
-		if isWhitespace {
-			continue
+		if i > 0 {
+			if t, prevIsText := nodes[i-1].(Text); prevIsText && t.GoTempl {
+				// gotext has captured trailing whitespace, so dont add indentation
+				level = 0
+			}
 		}
-		if nodes[i] == nil {
+
+		if i+1 < len(nodes) {
+			t, nextIsText := nodes[i+1].(Text)
+			if isWhitespace && nextIsText && t.GoTempl { // add leading space (text only captures trailing)
+				if err := nodes[i].Write(w, level); err != nil {
+					return err
+				}
+				continue
+			}
+			// if nextIsText {
+			// 	skipTrailing = true
+			// }
+		}
+		if isWhitespace || nodes[i] == nil {
 			continue
 		}
 		if err := nodes[i].Write(w, level); err != nil {
@@ -640,9 +658,13 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 		}
 
 		if t, ok := nodes[i].(Text); ok && t.GoTempl {
-			continue // skip extra trailing
+			skipTrailing = true
 		}
 
+		if skipTrailing {
+			skipTrailing = false
+			continue
+		}
 		// Apply trailing whitespace if present.
 		trailing := SpaceVertical
 		if wst, isWhitespaceTrailer := nodes[i].(WhitespaceTrailer); isWhitespaceTrailer {
@@ -1367,7 +1389,7 @@ func (fe GoForExpression) ChildNodes() []Node {
 }
 func (fe GoForExpression) IsNode() bool { return true }
 func (fe GoForExpression) Write(w io.Writer, indent int) error {
-	if err := writeIndent(w, indent, " {{ for ", fe.Expression.Value, " }}\n"); err != nil {
+	if err := writeIndent(w, indent, "{{ for ", fe.Expression.Value, " }}\n"); err != nil {
 		return err
 	}
 	if err := writeNodesIndented(w, indent+1, fe.Children); err != nil {

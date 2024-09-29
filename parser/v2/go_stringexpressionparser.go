@@ -7,8 +7,8 @@ import (
 var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	start := pi.Index()
 
-	// do not remove leading whitespace, since string expression go templates can be inlined
-	// _, _, _ = parse.OptionalWhitespace.Parse(pi)
+	// do not remove leading whitespace, since string expressions in go templates can be inlined
+	// and whitespace is important
 
 	// Attempt to parse the prefix first.
 	if _, ok, err = openGotemplStringExprWithOptionalPadding.Parse(pi); err != nil || !ok {
