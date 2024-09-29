@@ -94,9 +94,9 @@ var gotemplateExpressionParser = parse.Func(func(pi *parse.Input) (r gotemplateE
 		return r, false, err
 	}
 
-	// Eat " {\n".
-	if _, ok, err = parse.All(openBraceWithOptionalPadding, parse.StringFrom(parse.Optional(parse.NewLine))).Parse(pi); err != nil || !ok {
-		err = parse.Error("gotempl: malformed gotempl expression, expected `gotempl functionName() {`", pi.PositionAt(start))
+	// Eat " #{\n".
+	if _, ok, err = parse.All(gotemplOpenBraceWithOptionalPadding, parse.StringFrom(parse.Optional(parse.NewLine))).Parse(pi); err != nil || !ok {
+		err = parse.Error("gotempl: malformed gotempl expression, expected `gotempl functionName() #{`", pi.PositionAt(start))
 		return
 	}
 

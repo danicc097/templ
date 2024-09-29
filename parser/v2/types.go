@@ -633,7 +633,7 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 
 		if i > 0 {
 			if t, prevIsText := nodes[i-1].(Text); prevIsText && t.GoTempl {
-				// gotext has captured trailing whitespace, so dont add indentation
+				// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
 				level = 0
 			}
 		}
@@ -1307,7 +1307,7 @@ func (t GoTemplate) IsTemplateFileNode() bool { return true }
 
 func (t GoTemplate) Write(w io.Writer, indent int) error {
 	source := formatFunctionArguments(t.Expression.Value)
-	if err := writeIndent(w, indent, "gotempl ", string(source), " {\n"); err != nil {
+	if err := writeIndent(w, indent, "gotempl ", string(source), fmt.Sprintf(" %s\n", gotemplOpenBraceString)); err != nil {
 		return err
 	}
 	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {

@@ -3,7 +3,7 @@ package testgousage
 
 import "fmt"
 
-gotempl Package() {
+gotempl Package() #{
 	func main() {
 		const z = "z"
 		for i := 0; i < 3; i++ { println("z") }
@@ -17,7 +17,7 @@ package testgousage
 
 import "fmt"
 
-gotempl Package() {
+gotempl Package() #{
 	func main() {
 		const z = "z"
 		for i := 0; i < 3; i++ { println("z") }

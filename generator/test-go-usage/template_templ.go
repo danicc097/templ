@@ -24,7 +24,7 @@ rawgo syntax in base templ not experimental anymore.
 can adopt the same in gotempl expressions for consistency
 */
 
-func Package() templ.Component {
+func Package(paramA string, paramB int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -55,7 +55,7 @@ func Package() templ.Component {
 		/* this should not be printed */
 		/* this should not be printed */
 		y := "y"
-		_ = "a"
+		_ = paramA
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("// comment with ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -196,7 +196,7 @@ func TestComponent() templ.Component {
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = Package().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Package("a", 1).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

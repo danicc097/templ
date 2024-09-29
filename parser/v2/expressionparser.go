@@ -43,7 +43,10 @@ var openBraceWithPadding = parse.StringFrom(optionalSpaces,
 	optionalSpaces)
 var openBraceWithOptionalPadding = parse.Any(openBraceWithPadding, openBrace)
 
-const gotemplCloseBraceString = "}#"
+const (
+	gotemplCloseBraceString = "}#"
+	gotemplOpenBraceString  = "#{"
+)
 
 var (
 	closeBrace                    = parse.String("}")
@@ -53,6 +56,11 @@ var (
 	gotemplLastCloseBraceWithOptionalPadding = parse.Any(
 		parse.StringFrom(optionalSpaces, gotemplCloseBrace, optionalSpacesOrNewlines, parse.EOF[string]()),
 		parse.StringFrom(optionalSpaces, gotemplCloseBrace, parse.NewLine, parse.NewLine),
+	)
+	gotemplOpenBraceWithOptionalPadding = parse.StringFrom(
+		optionalSpaces,
+		parse.String(gotemplOpenBraceString),
+		optionalSpaces,
 	)
 )
 

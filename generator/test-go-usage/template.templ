@@ -17,7 +17,7 @@ rawgo syntax in base templ not experimental anymore.
 can adopt the same in gotempl expressions for consistency
 */
 
-gotempl Package() {
+gotempl Package(paramA string, paramB int) #{
   /*
   Package testgousage.
   */
@@ -32,7 +32,7 @@ gotempl Package() {
 	{{ /* this should not be printed */ }}
 	{{ /* this should not be printed */
   y := "y" }}
-	{{ _ = "a" }}
+	{{ _ = paramA }}
   // comment with %{ "var" }% with space
   // comment with%{ "var" }%without space
 	%{ "const _ab = " }% "ab"
@@ -68,5 +68,5 @@ gotempl Package() {
 
 // Combine all tests.
 templ TestComponent() {
-	@Package()
+	@Package("a", 1)
 }
