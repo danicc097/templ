@@ -82,6 +82,8 @@ var (
 	openGotemplStringExprWithOptionalPadding  = parse.StringFrom(openGotemplStringExpr, optionalSpaces)
 )
 
+var templElementStart = parse.StringFrom(parse.Rune('@'), parse.MustRegexp(`^[a-zA-Z_][a-zA-Z0-9_]*`), parse.Rune('('))
+
 var (
 	openParens  = parse.String("(")
 	closeParens = parse.String(")")

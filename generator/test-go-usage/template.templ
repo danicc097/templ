@@ -43,7 +43,6 @@ gotempl Package(paramA string, paramB int) #{
   /* Another comment that should be rendered
   */
 	{{ /* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */ }}
-	{{ /* TODO: dont render extra spaces in new lines */ }}
 	{{ /**/ }}
 	{{ /* this should not be printed */ }}
 	{{ /* this should not be printed */
@@ -67,24 +66,30 @@ gotempl Package(paramA string, paramB int) #{
 	{{ else }}
 		%{ "should never print this either" }%
 	{{ end }}
-	// FIXME: should respect indent for Text nodes inside gotempl.
-  // we will apply gofumpt to output anyway
-  func main() {
+	func main() {
     const z = "z"
     for i := 0; i < 3; i++ { println("z") }
     for i := 0; i < 3; i++ {
       println("z")
     }
+    _ = map[string][]A{
+      "a": %{ "[]A{{}, {}, {}}" }%,
+    }
   }
 
-  /* FIXME: @... not being called in line/block comment
+  /*
    * Fields: @JoinWith(", ", []string{"a", "b", "c"})
-   @JoinWith(", ", []string{"a", "b", "c"})
-	**/
+%{ " || " }% @JoinWith(", ", []string{"a", "b", "c"})
+	{{ /*in gotempl, \n is eaten by @ syntax by default
+  in case we use 2 elements in the same line. */ }}
+	%{ "\n" }%
+*/
   // Fields: @JoinWith(", ", []string{"a", "b", "c"})
-	type A struct {
+	%{ "\n" }%
+type A struct {
     @Fields()
 	}
+  @Noop()
 }#
 
 // Combine all tests.

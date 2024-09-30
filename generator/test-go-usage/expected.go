@@ -24,8 +24,6 @@ const _ab = "ab"
 // nested 3
 var abc = "abc"
 
-// FIXME: should respect indent for Text nodes inside gotempl.
-// we will apply gofumpt to output anyway
 func main() {
 	const z = "z"
 	for i := 0; i < 3; i++ {
@@ -34,12 +32,15 @@ func main() {
 	for i := 0; i < 3; i++ {
 		println("z")
 	}
+	_ = map[string][]A{
+		"a": {{}, {}, {}},
+}
 }
 
-/* FIXME: @... not being called in line/block comment
- * Fields: @JoinWith(", ", []string{"a", "b", "c"})
-a, b, c**/
-// Fields: @JoinWith(", ", []string{"a", "b", "c"})
+/*
+ * Fields: a, b, c || a, b, c
+ */
+// Fields: a, b, c
 type A struct {
 	a string
 	b string
