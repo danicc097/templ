@@ -26,7 +26,7 @@ var gogoCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	var r GoCode
 	r.GoTempl = true
 	pi2 := parse.NewInput(src)
-	ws, _, _ := parse.OptionalWhitespace.Parse(pi)
+	_, _, _ = parse.OptionalWhitespace.Parse(pi)
 	commentStartPos := pi2.Position()
 	_, _, _ = goTemplComment.Parse(pi2)
 	commentEndPos := pi2.Position()
@@ -66,16 +66,6 @@ var gogoCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 	if _, ok, err = dblCloseBraceWithOptionalPadding.Parse(pi); err != nil || !ok {
 		err = parse.Error("go code: missing close braces", pi.Position())
 		return
-	}
-
-	// Parse trailing whitespace.
-	ws, _, err = parse.Whitespace.Parse(pi)
-	if err != nil {
-		return r, false, err
-	}
-	r.TrailingSpace, err = NewTrailingSpace(ws)
-	if err != nil {
-		return r, false, err
 	}
 
 	return r, true, nil

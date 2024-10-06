@@ -622,57 +622,41 @@ func (e Element) Write(w io.Writer, indent int) error {
 func writeGotemplNodes(w io.Writer, level int, nodes []Node) error {
 	startLevel := level
 	var skipTrailing, prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
-	_ = nextIsWhitespace
 	var pt, nt Text
-	_ = pt
+	_, _, _, _, _, _ = pt, nt, prevIsWhitespace, nextIsWhitespace, prevIsText, nextIsText
 
 	for i := 0; i < len(nodes); i++ {
 		_, isWhitespace := nodes[i].(Whitespace)
-		text, isText := nodes[i].(Text)
-
-		if i > 0 {
-			_, prevIsWhitespace = nodes[i-1].(Whitespace)
-			if pt, prevIsText = nodes[i-1].(Text); prevIsText {
-				// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
-				level = 0
-			}
+		_, isText := nodes[i].(Text)
+		nextIsBlock := nextNodeIsBlock(nodes, i)
+		currentIsBlock := i > 0 && nextNodeIsBlock(nodes, i-1)
+		previousIsBlock := i > 1 && isBlockNode(nodes[i-2])
+		_, _, _, _ = previousIsBlock, currentIsBlock, nextIsBlock, isText
+		if nextIsBlock || nextIsText {
+			skipTrailing = false
+		} else {
+			skipTrailing = true
 		}
+		// if currentIsBlock {
+		// 	fmt.Fprint(os.Stderr, "block node:\n", currentIsBlock)
+		// 	nodes[i].Write(os.Stderr, 0)
+		// 	fmt.Fprint(os.Stderr, "----\n", currentIsBlock)
+		// }
 
-		if i+1 < len(nodes) {
-			_, nextIsWhitespace = nodes[i+1].(Whitespace)
-			nt, nextIsText = nodes[i+1].(Text)
-			if isWhitespace && nextIsText { // add leading space (text only captures trailing)
-				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
-				continue
-			}
-			if !isWhitespace && prevIsWhitespace && nextIsText {
-			}
-		}
-		if isWhitespace || nodes[i] == nil {
+		if nodes[i] == nil {
 			continue
 		}
 
-		if isText {
-			skipTrailing = true
-
-			if !prevIsText && !nextIsText && text.TrailingSpace != SpaceVertical {
-				skipTrailing = false
-				// TODO: this requires IsInline for nodes so we only indent when prev is !IsInline
-				// fmt.Fprintf(w, "[[%s]](%t)\n", strconv.Quote(text.Value), nextIsWhitespace)
-				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
-			}
+		skipWs := nextIsBlock
+		if isWhitespace && skipWs {
+			// block will or has handled indentation on its own
+			continue
 		}
 
 		if err := nodes[i].Write(w, level); err != nil {
 			return err
 		}
-
-		if isWhitespace && (nextIsText && nt.GoTempl) {
-			io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
-			continue
-		}
 		if skipTrailing {
-			skipTrailing = false
 			continue
 		}
 		// Apply trailing whitespace if present.
@@ -681,7 +665,7 @@ func writeGotemplNodes(w io.Writer, level int, nodes []Node) error {
 			trailing = wst.Trailing()
 		}
 		// Put a newline after the last node in indentation mode.
-		if (nextNodeIsBlock(nodes, i) || i == len(nodes)-1) || shouldAlwaysBreakAfter(nodes[i]) {
+		if (nextIsBlock || i == len(nodes)-1) || shouldAlwaysBreakAfter(nodes[i]) {
 			trailing = SpaceVertical
 		}
 		switch trailing {
@@ -1269,8 +1253,8 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 	}
 
 	if gc.GoTempl {
-		// TODO: only if line does not start with whitespace + `{{`, else indent
-		err := writeIndent(w, indent, `{{ `+gc.Expression.Value+` }}`)
+		// go code written as is, since we may inline it.
+		err := writeIndent(w, 0, `{{ `+gc.Expression.Value+` }}`)
 		return err
 	}
 

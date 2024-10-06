@@ -185,6 +185,10 @@ func Package(paramA string, paramB int) templ.Component {
 		first := items[0]
 		for _, i := range items {
 			/* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y))
 			if templ_7745c5c3_Err != nil {
