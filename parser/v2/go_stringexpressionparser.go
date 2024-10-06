@@ -28,14 +28,18 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 		pi.Seek(start) // not an expression that returns a string, might be just text.
 		return
 	}
-	// // Parse trailing whitespace.
-	// ws, _, err := parse.Whitespace.Parse(pi)
-	// if err != nil {
-	// 	return r, false, err
-	// }
-	// r.TrailingSpace, err = NewTrailingSpace(ws)
-	// if err != nil {
-	// 	return r, false, err
-	// }
+
+	// Parse trailing whitespace but dont consume it
+	wsStart := pi.Index()
+	ws, _, err := parse.Whitespace.Parse(pi)
+	if err != nil {
+		return r, false, err
+	}
+	r.TrailingSpace, err = NewTrailingSpace(ws)
+	if err != nil {
+		return r, false, err
+	}
+	pi.Seek(wsStart)
+
 	return r, true, nil
 })

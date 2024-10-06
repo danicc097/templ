@@ -619,6 +619,8 @@ func (e Element) Write(w io.Writer, indent int) error {
 	return nil
 }
 
+// TODO: node.Write when .GoTempl must not be indented unless its a block node or
+// the whole line is a gotempl expression.
 func writeGotemplNodes(w io.Writer, level int, nodes []Node) error {
 	startLevel := level
 	var skipTrailing, prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
@@ -651,6 +653,15 @@ func writeGotemplNodes(w io.Writer, level int, nodes []Node) error {
 		if isWhitespace && skipWs {
 			// block will or has handled indentation on its own
 			continue
+		}
+
+		if _, ok := nodes[i].(TemplElementExpression); ok {
+			level = 0 // we will allow inlining these
+		}
+		if gc, ok := nodes[i].(GoCode); ok {
+			if gc.TrailingSpace != SpaceVertical {
+				level = 0 // code is inlined
+			}
 		}
 
 		if err := nodes[i].Write(w, level); err != nil {
@@ -1254,7 +1265,11 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 
 	if gc.GoTempl {
 		// go code written as is, since we may inline it.
-		err := writeIndent(w, 0, `{{ `+gc.Expression.Value+` }}`)
+		level := 0
+		if gc.TrailingSpace == SpaceVertical {
+			level = indent
+		}
+		err := writeIndent(w, level, `{{ `+gc.Expression.Value+` }}`)
 		return err
 	}
 

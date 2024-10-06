@@ -68,5 +68,17 @@ var gogoCode = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error) {
 		return
 	}
 
+	// Parse trailing whitespace but dont consume it
+	wsStart := pi.Index()
+	ws, _, err := parse.Whitespace.Parse(pi)
+	if err != nil {
+		return r, false, err
+	}
+	r.TrailingSpace, err = NewTrailingSpace(ws)
+	if err != nil {
+		return r, false, err
+	}
+	pi.Seek(wsStart)
+
 	return r, true, nil
 })
