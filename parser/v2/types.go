@@ -619,19 +619,12 @@ func (e Element) Write(w io.Writer, indent int) error {
 	return nil
 }
 
-func writeNodesWithoutIndentation(w io.Writer, nodes []Node) error {
-	return writeNodes(w, 0, nodes, false)
-}
-
-func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
-	return writeNodes(w, level, nodes, true)
-}
-
-func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
+func writeGotemplNodes(w io.Writer, level int, nodes []Node) error {
 	startLevel := level
 	var skipTrailing, prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
 	_ = nextIsWhitespace
 	var pt, nt Text
+	_ = pt
 
 	for i := 0; i < len(nodes); i++ {
 		_, isWhitespace := nodes[i].(Whitespace)
@@ -639,7 +632,7 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 
 		if i > 0 {
 			_, prevIsWhitespace = nodes[i-1].(Whitespace)
-			if pt, prevIsText = nodes[i-1].(Text); prevIsText && pt.GoTempl {
+			if pt, prevIsText = nodes[i-1].(Text); prevIsText {
 				// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
 				level = 0
 			}
@@ -648,18 +641,18 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 		if i+1 < len(nodes) {
 			_, nextIsWhitespace = nodes[i+1].(Whitespace)
 			nt, nextIsText = nodes[i+1].(Text)
-			if isWhitespace && nextIsText && nt.GoTempl { // add leading space (text only captures trailing)
+			if isWhitespace && nextIsText { // add leading space (text only captures trailing)
 				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
 				continue
 			}
-			if !isWhitespace && prevIsWhitespace && nextIsText && nt.GoTempl {
+			if !isWhitespace && prevIsWhitespace && nextIsText {
 			}
 		}
 		if isWhitespace || nodes[i] == nil {
 			continue
 		}
 
-		if isText && text.GoTempl {
+		if isText {
 			skipTrailing = true
 
 			if !prevIsText && !nextIsText && text.TrailingSpace != SpaceVertical {
@@ -682,6 +675,51 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 			skipTrailing = false
 			continue
 		}
+		// Apply trailing whitespace if present.
+		trailing := SpaceVertical
+		if wst, isWhitespaceTrailer := nodes[i].(WhitespaceTrailer); isWhitespaceTrailer {
+			trailing = wst.Trailing()
+		}
+		// Put a newline after the last node in indentation mode.
+		if (nextNodeIsBlock(nodes, i) || i == len(nodes)-1) || shouldAlwaysBreakAfter(nodes[i]) {
+			trailing = SpaceVertical
+		}
+		switch trailing {
+		case SpaceNone:
+			level = 0
+		case SpaceHorizontal:
+			level = 0
+		case SpaceVertical:
+			level = startLevel
+		}
+		if _, err := w.Write([]byte(trailing)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func writeNodesWithoutIndentation(w io.Writer, nodes []Node) error {
+	return writeNodes(w, 0, nodes, false)
+}
+
+func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
+	return writeNodes(w, level, nodes, true)
+}
+
+func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
+	startLevel := level
+	for i := 0; i < len(nodes); i++ {
+		_, isWhitespace := nodes[i].(Whitespace)
+
+		// Skip whitespace nodes.
+		if isWhitespace {
+			continue
+		}
+		if err := nodes[i].Write(w, level); err != nil {
+			return err
+		}
+
 		// Apply trailing whitespace if present.
 		trailing := SpaceVertical
 		if wst, isWhitespaceTrailer := nodes[i].(WhitespaceTrailer); isWhitespaceTrailer {
@@ -727,6 +765,10 @@ func isBlockNode(node Node) bool {
 	case SwitchExpression:
 		return true
 	case ForExpression:
+		return true
+	case GoTemplForExpression:
+		return true
+	case GoTemplIfExpression:
 		return true
 	case Element:
 		return n.IsBlockElement() || n.IndentChildren
@@ -1327,7 +1369,7 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 	if err := writeIndent(w, indent, "gotempl ", string(source), fmt.Sprintf(" %s\n", gotemplOpenBraceString)); err != nil {
 		return err
 	}
-	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
+	if err := writeGotemplNodes(w, indent+1, t.Children); err != nil {
 		return err
 	}
 	if err := writeIndent(w, indent, gotemplCloseBraceString); err != nil {
@@ -1341,7 +1383,7 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 //	println(var)
 //
 // {{ end }}
-type GoIfExpression struct {
+type GoTemplIfExpression struct {
 	Expression Expression
 	Then       []Node
 	ElseIfs    []GoElseIfExpression
@@ -1353,7 +1395,7 @@ type GoElseIfExpression struct {
 	Then       []Node
 }
 
-func (n GoIfExpression) ChildNodes() []Node {
+func (n GoTemplIfExpression) ChildNodes() []Node {
 	var nodes []Node
 	nodes = append(nodes, n.Then...)
 	nodes = append(nodes, n.Else...)
@@ -1363,9 +1405,9 @@ func (n GoIfExpression) ChildNodes() []Node {
 	return nodes
 }
 
-func (ie GoIfExpression) IsNode() bool { return true }
+func (ie GoTemplIfExpression) IsNode() bool { return true }
 
-func (ie GoIfExpression) Write(w io.Writer, indent int) error {
+func (ie GoTemplIfExpression) Write(w io.Writer, indent int) error {
 	if err := writeIndent(w, indent, "{{ if ", ie.Expression.Value, " }}\n"); err != nil {
 		return err
 	}
@@ -1396,16 +1438,16 @@ func (ie GoIfExpression) Write(w io.Writer, indent int) error {
 //	{! Address(v) }
 //
 // {{ end }}
-type GoForExpression struct {
+type GoTemplForExpression struct {
 	Expression Expression
 	Children   []Node
 }
 
-func (fe GoForExpression) ChildNodes() []Node {
+func (fe GoTemplForExpression) ChildNodes() []Node {
 	return fe.Children
 }
-func (fe GoForExpression) IsNode() bool { return true }
-func (fe GoForExpression) Write(w io.Writer, indent int) error {
+func (fe GoTemplForExpression) IsNode() bool { return true }
+func (fe GoTemplForExpression) Write(w io.Writer, indent int) error {
 	if err := writeIndent(w, indent, "{{ for ", fe.Expression.Value, " }}\n"); err != nil {
 		return err
 	}

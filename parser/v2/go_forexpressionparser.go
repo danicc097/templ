@@ -10,7 +10,7 @@ var goForExpression parse.Parser[Node] = goForExpressionParser{}
 type goForExpressionParser struct{}
 
 func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) {
-	var r GoForExpression
+	var r GoTemplForExpression
 	start := pi.Index()
 
 	// do not remove leading whitespace, since string expression go templates can be inlined

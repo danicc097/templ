@@ -18,7 +18,7 @@ var goIfExpression parse.Parser[Node] = goIfExpressionParser{}
 type goIfExpressionParser struct{}
 
 func (goIfExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) {
-	var r GoIfExpression
+	var r GoTemplIfExpression
 	start := pi.Index()
 
 	if _, ok, err = parse.All(

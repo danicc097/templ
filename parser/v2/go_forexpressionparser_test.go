@@ -18,7 +18,7 @@ func TestForExpressionParser_Go(t *testing.T) {
 			input: `{{ for _, item := range p.Items }}
 					%{ item }%
 				{{ end }}`,
-			expected: GoForExpression{
+			expected: GoTemplForExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `_, item := range p.Items`,
@@ -53,7 +53,7 @@ func TestForExpressionParser_Go(t *testing.T) {
 		{
 			name:  "for: no newlines",
 			input: `{{ for _, item := range p.Items }}%{item}%{{ end }}`,
-			expected: GoForExpression{
+			expected: GoTemplForExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   "_, item := range p.Items",

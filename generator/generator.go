@@ -670,9 +670,9 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 	case parser.GoComment:
 		// Do not render Go comments in the output HTML.
 		return
-	case parser.GoForExpression:
+	case parser.GoTemplForExpression:
 		err = g.writeForExpression(indentLevel, parser.ForExpression(n), next)
-	case parser.GoIfExpression:
+	case parser.GoTemplIfExpression:
 		elseIfs := make([]parser.ElseIfExpression, len(n.ElseIfs))
 		for i, e := range n.ElseIfs {
 			elseIfs[i] = parser.ElseIfExpression(e)

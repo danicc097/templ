@@ -11,14 +11,14 @@ func TestGoIfExpression(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected GoIfExpression
+		expected GoTemplIfExpression
 	}{
 		{
 			name: "if simple expression",
 			input: `{{ if p.Test }}
   %{ "content" }%
 {{ end }}`,
-			expected: GoIfExpression{
+			expected: GoTemplIfExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `p.Test`,
@@ -59,7 +59,7 @@ func TestGoIfExpression(t *testing.T) {
 {{ else }}
 	{{ "B" }}
 {{ end }}`,
-			expected: GoIfExpression{
+			expected: GoTemplIfExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `p.A`,
@@ -113,7 +113,7 @@ func TestGoIfExpression(t *testing.T) {
 {{ else if p.B }}
 	{{ "B" }}
 {{ end }}`,
-			expected: GoIfExpression{
+			expected: GoTemplIfExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `p.A`,
@@ -177,7 +177,7 @@ func TestGoIfExpression(t *testing.T) {
 			input: `{{ if p.Test }}
   text
 {{ end }}`,
-			expected: GoIfExpression{
+			expected: GoTemplIfExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `p.Test`,
@@ -216,7 +216,7 @@ func TestGoIfExpression(t *testing.T) {
 {{ else }}
 	{{ "B" }}
 {{ end }}`,
-			expected: GoIfExpression{
+			expected: GoTemplIfExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `p.A`,
@@ -270,7 +270,7 @@ func TestGoIfExpression(t *testing.T) {
 						{{ "C" }}
 					{{ end }}
 				{{ end }}`,
-			expected: GoIfExpression{
+			expected: GoTemplIfExpression{
 				Expression: Expression{
 					GoTempl: true,
 					Value:   `p.A`,
@@ -288,7 +288,7 @@ func TestGoIfExpression(t *testing.T) {
 					},
 				},
 				Then: []Node{
-					GoIfExpression{
+					GoTemplIfExpression{
 						Expression: Expression{
 							GoTempl: true,
 							Value:   `p.B`,
@@ -336,7 +336,7 @@ func TestGoIfExpression(t *testing.T) {
 			}
 
 			// Ignore ranges in comparison, they are tested elsewhere.
-			if diff := cmp.Diff(tt.expected, result, cmp.AllowUnexported(GoIfExpression{}, StringExpression{}, Element{}, Whitespace{}, Expression{}, Position{})); diff != "" {
+			if diff := cmp.Diff(tt.expected, result, cmp.AllowUnexported(GoTemplIfExpression{}, StringExpression{}, Element{}, Whitespace{}, Expression{}, Position{})); diff != "" {
 				t.Errorf("unexpected result, diff (-want +got):\n%s", diff)
 			}
 		})
