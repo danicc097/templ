@@ -77,8 +77,9 @@ var (
 // %{ ... }% allows us to reuse most of the existing string expression parser logic
 var (
 	closeGotemplStringExpr                    = parse.String("}%")
+	closeGotemplStringExprWithMarker          = parse.String("-}%")
 	openGotemplStringExpr                     = parse.String("%{")
-	closeGotemplStringExprWithOptionalPadding = parse.StringFrom(optionalSpaces, closeGotemplStringExpr)
+	closeGotemplStringExprWithOptionalPadding = parse.StringFrom(optionalSpaces, parse.Any(closeGotemplStringExpr, closeGotemplStringExprWithMarker))
 	openGotemplStringExprWithOptionalPadding  = parse.StringFrom(openGotemplStringExpr, optionalSpaces)
 )
 

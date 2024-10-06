@@ -1246,8 +1246,9 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 type StringExpression struct {
 	Expression Expression
 	// TrailingSpace lists what happens after the expression.
-	TrailingSpace TrailingSpace
-	GoTempl       bool
+	TrailingSpace    TrailingSpace
+	GoTempl          bool
+	GoTemplEndMarker bool
 }
 
 func (se StringExpression) Trailing() TrailingSpace {
@@ -1261,11 +1262,15 @@ func (se StringExpression) Write(w io.Writer, indent int) (err error) {
 		se.Expression.Value = ""
 	}
 	if se.GoTempl {
+		suf := ` }%`
+		if se.GoTemplEndMarker {
+			suf = ` -}%`
+		}
 		// only write indent if not inlined, else we get \t on every save
 		if se.TrailingSpace != SpaceVertical {
-			_, err = io.WriteString(w, `%{ `+se.Expression.Value+` }%`)
+			_, err = io.WriteString(w, `%{ `+se.Expression.Value+suf)
 		} else {
-			err = writeIndent(w, indent, `%{ `+se.Expression.Value+` }%`)
+			err = writeIndent(w, indent, `%{ `+se.Expression.Value+suf)
 		}
 		return
 	}

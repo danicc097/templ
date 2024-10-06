@@ -107,6 +107,30 @@ func TestGoStringExpressionParser(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:  "basic expression with end marker",
+			input: `%{ "this" -}%`,
+			expected: StringExpression{
+				GoTempl:          true,
+				GoTemplEndMarker: true,
+				Expression: Expression{
+					GoTempl: true,
+					Value:   `"this"`,
+					Range: Range{
+						From: Position{
+							Index: 3,
+							Line:  0,
+							Col:   3,
+						},
+						To: Position{
+							Index: 9,
+							Line:  0,
+							Col:   9,
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

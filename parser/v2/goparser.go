@@ -34,18 +34,22 @@ func parseCSSFuncDecl(pi *parse.Input) (name string, expression Expression, err 
 	return parseGoFuncDecl("css", pi)
 }
 
-func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, err error) {
+func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, endMarker bool, err error) {
 	if closingChars == "}%" {
 	}
 	from := pi.Position()
 	src, _ := pi.Peek(-1)
+	if strings.HasSuffix(src, "-"+closingChars) {
+		src = strings.TrimSuffix(src, "-"+closingChars) + closingChars
+		endMarker = true
+	}
 	expr, err := goexpression.SliceArgs(src, closingChars)
 	if err != nil {
-		return r, err
+		return r, false, err
 	}
 	pi.Take(len(expr))
 	to := pi.Position()
-	return NewExpression(expr, from, to), nil
+	return NewExpression(expr, from, to), endMarker, nil
 }
 
 func peekPrefix(pi *parse.Input, prefixes ...string) bool {

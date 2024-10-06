@@ -18,7 +18,7 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 
 	// Once we have a prefix, we must have an expression that returns a string, with optional err.
 	r := StringExpression{GoTempl: true}
-	if r.Expression, err = parseGoSliceArgs(pi, "}%"); err != nil || !ok {
+	if r.Expression, r.GoTemplEndMarker, err = parseGoSliceArgs(pi, "}%"); err != nil || !ok {
 		pi.Seek(start) // not an expression that returns a string, might be just text.
 		return r, false, err
 	}

@@ -12,7 +12,7 @@ var stringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err er
 
 	// Once we have a prefix, we must have an expression that returns a string, with optional err.
 	var r StringExpression
-	if r.Expression, err = parseGoSliceArgs(pi, "}"); err != nil {
+	if r.Expression, _, err = parseGoSliceArgs(pi, "}"); err != nil {
 		return r, false, err
 	}
 
