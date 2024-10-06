@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go/format"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -231,8 +230,7 @@ func (ws Whitespace) IsNode() bool { return true }
 
 func (ws Whitespace) Write(w io.Writer, indent int) error {
 	if ws.GoTempl {
-		// dont remove whitespace in go templates
-		fmt.Fprintf(os.Stderr, "ws.Value: %v\n", ws.Value)
+		// write complete whitespace in gotempl if node not skipped
 		_, err := io.WriteString(w, ws.Value)
 		return err
 	}
@@ -1266,10 +1264,12 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 	if gc.GoTempl {
 		// go code written as is, since we may inline it.
 		level := 0
+		_ = level
 		if gc.TrailingSpace == SpaceVertical {
 			level = indent
 		}
-		err := writeIndent(w, level, `{{ `+gc.Expression.Value+` }}`)
+		// if we write indent here, then we would need to mremove prefvious whitespace
+		err := writeIndent(w, 0, `{{ `+gc.Expression.Value+` }}`)
 		return err
 	}
 
