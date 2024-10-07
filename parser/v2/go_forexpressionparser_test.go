@@ -52,7 +52,7 @@ func TestForExpressionParser_Go(t *testing.T) {
 		},
 		{
 			name:  "for: no newlines",
-			input: `{{ for _, item := range p.Items }}%{item}%{{ end }}`,
+			input: `{{ for _, item := range p.Items }}%{item-}%{{ end }}`,
 			expected: GoForExpression{
 				Expression: Expression{
 					GoTempl: true,
@@ -71,7 +71,8 @@ func TestForExpressionParser_Go(t *testing.T) {
 					},
 				}, Children: []Node{
 					StringExpression{
-						GoTempl: true,
+						GoTempl:          true,
+						GoTemplEndMarker: true,
 						Expression: Expression{
 							GoTempl: true, Value: "item", Range: Range{
 								From: Position{Index: 36, Line: 0, Col: 36},

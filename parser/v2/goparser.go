@@ -35,15 +35,24 @@ func parseCSSFuncDecl(pi *parse.Input) (name string, expression Expression, err 
 }
 
 func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, endMarker bool, err error) {
+	var expr string
 	if closingChars == "}%" {
+		var ok bool
+		start := pi.Index()
+		prs := parse.StringUntil(parse.StringFrom(parse.OptionalWhitespace, closeGotemplStringExprWithMarker))
+		if expr, ok, err = prs.Parse(pi); ok {
+			endMarker = true
+		}
+		pi.Seek(start)
 	}
 	from := pi.Position()
-	src, _ := pi.Peek(-1)
-	if strings.HasSuffix(src, "-"+closingChars) {
-		src = strings.TrimSuffix(src, "-"+closingChars) + closingChars
-		endMarker = true
+	var src string
+	if expr != "" {
+		src = expr
+	} else {
+		src, _ = pi.Peek(-1)
 	}
-	expr, err := goexpression.SliceArgs(src, closingChars)
+	expr, err = goexpression.SliceArgs(src, closingChars)
 	if err != nil {
 		return r, false, err
 	}
