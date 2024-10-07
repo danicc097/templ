@@ -26,9 +26,9 @@ gotempl Fields() #{
 gotempl JoinWith(sep string, items []string) #{
 	{{ for _, i := range items }}
 		{{ if i != items[len(items)-1] }}
-			%{ fmt.Sprintf("%s%s", i, sep) }%
+			%{ fmt.Sprintf("%s%s", i, sep) -}%
 		{{ else }}
-			%{ i }%
+			%{ i -}%
 		{{ end }}
 	{{ end }}
 }#
@@ -73,19 +73,19 @@ gotempl Package(paramA string, paramB int) #{
       println("z")
     }
     _ = map[string][]A{
-      "a": %{ "[]A{{}, {}, {}}" }%,
+      "a": %{ "[]A{{}, {}, {}}" -}%,
     }
   }
 
   /*
    * Fields: @JoinWith(", ", []string{"a", "b", "c"})
-%{ " || " }% @JoinWith(", ", []string{"a", "b", "c"})
+%{ " || " -}% @JoinWith(", ", []string{"a", "b", "c"})
 	{{ /*in gotempl, \n is eaten by @ syntax by default
   in case we use 2 elements in the same line. */ }}
-	%{ "\n" }%
+	%{ "" }%
 */
   // Fields: @JoinWith(", ", []string{"a", "b", "c"})
-	%{ "\n" }%
+	%{ "" }%
 type A struct {
     @Fields()
 	}
