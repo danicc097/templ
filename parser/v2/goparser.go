@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/a-h/parse"
@@ -35,24 +36,31 @@ func parseCSSFuncDecl(pi *parse.Input) (name string, expression Expression, err 
 }
 
 func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, endMarker bool, err error) {
-	var expr string
-	if closingChars == "}%" {
-		var ok bool
-		start := pi.Index()
-		prs := parse.StringUntil(parse.StringFrom(parse.OptionalWhitespace, closeGotemplStringExprWithMarker))
-		if expr, ok, err = prs.Parse(pi); ok {
-			endMarker = true
-		}
-		pi.Seek(start)
-	}
-	from := pi.Position()
 	var src string
-	if expr != "" {
-		src = expr
-	} else {
+	if closingChars == "}%" {
+		start := pi.Index()
+		// attempt both and keep the one that has the shortest string length
+		// since we are parsing the whole remaining input
+		srcMarker, srcMarkerOk, _ := parse.StringUntil(parse.StringFrom(parse.OptionalWhitespace, closeGotemplStringExprWithMarker)).Parse(pi)
+		pi.Seek(start)
+		srcRegular, srcRegularOk, _ := parse.StringUntil(parse.StringFrom(parse.OptionalWhitespace, closeGotemplStringExpr)).Parse(pi)
+		pi.Seek(start)
+		if !srcMarkerOk && !srcRegularOk {
+			return r, false, fmt.Errorf("invalid go expression: %v", err)
+		}
+		if len(srcMarker) < len(srcRegular) && srcMarkerOk {
+			src = srcMarker
+			endMarker = true
+		} else {
+			src = srcRegular
+		}
+	}
+	fmt.Fprintf(os.Stderr, "src: %s\n", src)
+	from := pi.Position()
+	if src == "" {
 		src, _ = pi.Peek(-1)
 	}
-	expr, err = goexpression.SliceArgs(src, closingChars)
+	expr, err := goexpression.SliceArgs(src, closingChars)
 	if err != nil {
 		return r, false, err
 	}

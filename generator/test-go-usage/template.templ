@@ -19,7 +19,7 @@ can adopt the same in gotempl expressions for consistency
 
 gotempl Fields() #{
 	{{ for _, i := range []string{"a", "b", "c"} }}
-		%{ fmt.Sprintf("%s string \n", i) }%
+		%{ fmt.Sprintf("%s string", i) }%
 	{{ end }}
 }#
 
@@ -48,19 +48,19 @@ gotempl Package(paramA string, paramB int) #{
 	{{ /* this should not be printed */
   y := "y" }}
 	{{ _ = paramA }}
-	// comment with %{ "var" }% with space
-  // comment with%{ "var" }%without space
-	%{ "const _ab = " }% "ab"
+	// comment with %{ "var" -}% with space
+  // comment with%{ "var" -}%without space
+	%{ "const _ab = " -}% "ab"
 	{{ first := items[0] }}
 	{{ for _, i := range items }}
 		{{ /* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */ }}
-		%{ fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y) }%
+		%{ fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y) }%
 		{{ for _, j := range items }}
-			%{ fmt.Sprintf("// nested %d\n", j) }%
+			%{ fmt.Sprintf("// nested %d", j) }%
 		{{ end }}
 	{{ end }}
 	{{ if true }}
-		%{ "var abc = \"abc\"\n" }%
+		%{ "var abc = \"abc\"" }%
 	{{ else if first == 999 }}
 		%{ "should never print this" }%
 	{{ else }}

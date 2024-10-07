@@ -1,6 +1,9 @@
 package parser
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/a-h/parse"
 )
 
@@ -23,8 +26,9 @@ var gostringExpression = parse.Func(func(pi *parse.Input) (n Node, ok bool, err 
 		return r, false, err
 	}
 	r.Expression.GoTempl = true
-
+	src, _ := pi.Peek(-1)
 	if _, ok, err = closeGotemplStringExprWithOptionalPadding.Parse(pi); err != nil || !ok {
+		fmt.Fprintln(os.Stderr, "string(src):", string(src))
 		pi.Seek(start) // not an expression that returns a string, might be just text.
 		return
 	}

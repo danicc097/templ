@@ -47,9 +47,9 @@ func Fields() templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		for _, i := range []string{"a", "b", "c"} {
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s string \n", i))
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s string", i) + "\n")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 22, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 22, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 			if templ_7745c5c3_Err != nil {
@@ -84,7 +84,7 @@ func JoinWith(sep string, items []string) templ.Component {
 		for _, i := range items {
 			if i != items[len(items)-1] {
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s%s", i, sep))
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s%s", i, sep) + "\n")
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 29, Col: 33}
 				}
@@ -94,7 +94,7 @@ func JoinWith(sep string, items []string) templ.Component {
 				}
 			} else {
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(i)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(i + "\n")
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 31, Col: 7}
 				}
@@ -186,9 +186,9 @@ func Package(paramA string, paramB int) templ.Component {
 		for _, i := range items {
 			/* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s\n", ab(), i, first, y))
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y) + "\n")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 57, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 57, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 			if templ_7745c5c3_Err != nil {
@@ -196,9 +196,9 @@ func Package(paramA string, paramB int) templ.Component {
 			}
 			for _, j := range items {
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// nested %d\n", j))
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("// nested %d", j) + "\n")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 59, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 59, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 				if templ_7745c5c3_Err != nil {
@@ -208,9 +208,9 @@ func Package(paramA string, paramB int) templ.Component {
 		}
 		if true {
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("var abc = \"abc\"\n")
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("var abc = \"abc\"" + "\n")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 63, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 63, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -222,7 +222,7 @@ func Package(paramA string, paramB int) templ.Component {
 			}
 		} else if first == 999 {
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("should never print this")
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("should never print this" + "\n")
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 65, Col: 30}
 			}
@@ -236,7 +236,7 @@ func Package(paramA string, paramB int) templ.Component {
 			}
 		} else {
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("should never print this either")
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("should never print this either" + "\n")
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 67, Col: 37}
 			}
@@ -254,7 +254,7 @@ func Package(paramA string, paramB int) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs("[]A{{}, {}, {}}")
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs("[]A{{}, {}, {}}" + "\n")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 76, Col: 31}
 		}
@@ -271,7 +271,7 @@ func Package(paramA string, paramB int) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(" || ")
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(" || " + "\n")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 82, Col: 9}
 		}
@@ -286,7 +286,7 @@ func Package(paramA string, paramB int) templ.Component {
 		/*in gotempl, \n is eaten by @ syntax by default
 		  in case we use 2 elements in the same line. */
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("\n")
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("\n" + "\n")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 85, Col: 8}
 		}
@@ -303,7 +303,7 @@ func Package(paramA string, paramB int) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("\n")
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs("\n" + "\n")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `generator/test-go-usage/template.templ`, Line: 88, Col: 8}
 		}

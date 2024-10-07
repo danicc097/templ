@@ -658,6 +658,9 @@ func (g *generator) writeNode(indentLevel int, current parser.Node, next parser.
 		err = g.writeSwitchExpression(indentLevel, n, next)
 	case parser.StringExpression:
 		// fmt.Fprintf(os.Stderr, "parser.StringExpression: %v\n", n.Expression.Value)
+		if n.GoTempl && !n.GoTemplEndMarker {
+			n.Expression.Value = n.Expression.Value + `+"\n"`
+		}
 		err = g.writeStringExpression(indentLevel, n.Expression)
 	case parser.GoCode:
 		err = g.writeGoCode(indentLevel, n.Expression)
