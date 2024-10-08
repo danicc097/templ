@@ -1012,6 +1012,7 @@ type TemplElementExpression struct {
 	Expression Expression
 	// Children returns the elements in a block element.
 	Children []Node
+	GoTempl  bool
 }
 
 func (tee TemplElementExpression) ChildNodes() []Node {

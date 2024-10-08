@@ -878,7 +878,7 @@ func (g *generator) writeBlockTemplElementExpression(indentLevel int, n parser.T
 	if _, err = g.w.WriteIndent(indentLevel, "templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context\n"); err != nil {
 		return err
 	}
-	if err := g.writeTemplBuffer(indentLevel); err != nil {
+	if err = g.writeTemplBuffer(indentLevel); err != nil {
 		return err
 	}
 	// ctx = templ.InitializeContext(ctx)

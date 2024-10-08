@@ -34,7 +34,7 @@ func main() {
 	}
 	_ = map[string][]A{
 		"a": {{}, {}, {}},
-}
+	}
 }
 
 /*
@@ -42,6 +42,10 @@ func main() {
  */
 // Fields: a, b, c
 type A struct {
+	// wrapping children
+	// child 1
+	// child 2
+	// ended wrapping
 	a string
 	b string
 	c string

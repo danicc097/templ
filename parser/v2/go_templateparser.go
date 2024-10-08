@@ -164,8 +164,9 @@ var gotemplateNodeParsers = [...]parse.Parser[Node]{
 	// templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
 	// childrenExpression,     // { children... }
 
-	callTemplateExpression, // {! TemplateName(a, b, c) }
-	templElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
+	callTemplateExpression,   // {! TemplateName(a, b, c) } - TODO:  gotempl with GoTempl flag
+	goTemplElementExpression, // @TemplateName(a, b, c) { <div>Children</div> }
+	childrenExpression,       // literal { children... } string  - can reuse in gotempl
 	gowhitespaceExpression,
 	gogoCode,     // {{ myval := x.myval }}
 	gotextParser, // match anything, assume they're valid go code fragments
