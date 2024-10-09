@@ -649,13 +649,20 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 			_, nextIsWhitespace = nodes[i+1].(Whitespace)
 			nt, nextIsText = nodes[i+1].(Text)
 			if isWhitespace && nextIsText && nt.GoTempl { // add leading space (text only captures trailing)
-				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
+				// only apply leading space is not important is
+				if !isPrevGoTemplInlineable(nodes, i) {
+					pre := strings.Repeat("\t", level)
+					io.WriteString(w, pre)
+				}
 				continue
 			}
 			if !isWhitespace && prevIsWhitespace && nextIsText && nt.GoTempl {
 			}
 		}
-		if isWhitespace || nodes[i] == nil {
+		if nodes[i] == nil {
+			continue
+		}
+		if isWhitespace { //&& isPrevGoTemplInlineable(nodes, i) {
 			continue
 		}
 
@@ -666,7 +673,9 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 				skipTrailing = false
 				// TODO: this requires IsInline for nodes so we only indent when prev is !IsInline
 				// fmt.Fprintf(w, "[[%s]](%t)\n", strconv.Quote(text.Value), nextIsWhitespace)
-				io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
+				if !isPrevGoTemplInlineable(nodes, i) && !nextNodeIsBlock(nodes, i) {
+					io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
+				}
 			}
 		}
 
@@ -674,7 +683,7 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 			return err
 		}
 
-		if isWhitespace && (nextIsText && nt.GoTempl) {
+		if (isWhitespace) && (nextIsText && nt.GoTempl) {
 			io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
 			continue
 		}
@@ -720,6 +729,26 @@ func nextNodeIsBlock(nodes []Node, i int) bool {
 	return isBlockNode(nodes[i+1])
 }
 
+func prevNodeIsBlock(nodes []Node, i int) bool {
+	if i == 0 {
+		return false
+	}
+	return isBlockNode(nodes[i-1])
+}
+
+func isPrevGoTemplInlineable(nodes []Node, i int) bool {
+	if i == 0 {
+		return false
+	}
+	switch nodes[i-1].(type) {
+	case StringExpression:
+		return true
+	case GoCode:
+		return true
+	}
+	return false
+}
+
 func isBlockNode(node Node) bool {
 	switch n := node.(type) {
 	case IfExpression:
@@ -727,6 +756,10 @@ func isBlockNode(node Node) bool {
 	case SwitchExpression:
 		return true
 	case ForExpression:
+		return true
+	case GoForExpression:
+		return true
+	case GoIfExpression:
 		return true
 	case Element:
 		return n.IsBlockElement() || n.IndentChildren

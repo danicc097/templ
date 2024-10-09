@@ -34,13 +34,13 @@ gotempl JoinWith(sep string, items []string) #{
 }#
 
 gotempl WrappedChildren() #{
-	// wrapping children
+// wrapping children
   { children... }
 	// ended wrapping
 }#
 
 gotempl Package(paramA string, paramB int) #{
-	/*
+/*
   Package testgousage.
   */
   package testgousage
@@ -64,6 +64,8 @@ gotempl Package(paramA string, paramB int) #{
 		{{ for _, j := range items }}
 			%{ fmt.Sprintf("// nested %d", j) }%
 		{{ end }}
+		// 1
+    {{ /*FIXME: indent not stopping with text+endblock */ }}
 	{{ end }}
 	{{ if true }}
 		%{ "var abc = \"abc\"" }%
@@ -79,7 +81,8 @@ gotempl Package(paramA string, paramB int) #{
       println("z")
     }
     _ = map[string][]A{
-      "a": %{ "[]A{{}, {}, {}}" -}%,
+  {{ /* can escape conflicting syntax */ }}
+	"a": %{ "[]A{{}, {}, {}}" -}%,
     }
   }
 
@@ -97,7 +100,7 @@ type A struct {
   @WrappedChildren() {
 	%{ "// child 1" }%
 // child 2
-}
+  }
 	@Fields()
 	}
   @Noop()
