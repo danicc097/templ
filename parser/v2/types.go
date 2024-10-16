@@ -232,7 +232,6 @@ func (ws Whitespace) IsNode() bool { return true }
 func (ws Whitespace) Write(w io.Writer, indent int) error {
 	if ws.GoTempl {
 		// dont remove whitespace in go templates
-		fmt.Fprintf(os.Stderr, "ws.Value: %v\n", ws.Value)
 		_, err := io.WriteString(w, strings.ReplaceAll(ws.Value, "\t", "  "))
 		return err
 	}
@@ -629,16 +628,20 @@ func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
 
 func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 	startLevel := level
-	var skipTrailing, prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
+	var prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
 	var pt, nt Text
-	_, _, _, _, _, _, _ = nextIsWhitespace, prevIsWhitespace, nextIsText, prevIsText, skipTrailing, pt, nt
-	var isGoTempl bool
+	_, _, _, _, _, _ = nextIsWhitespace, prevIsWhitespace, nextIsText, prevIsText, pt, nt
 	for i := 0; i < len(nodes); i++ {
+		skipTrailing := false
 		ws, isWhitespace := nodes[i].(Whitespace)
-		_, isText := nodes[i].(Text)
+		t, isText := nodes[i].(Text)
 
 		if isWhitespace && ws.GoTempl {
-			isGoTempl = true
+			if i+1 < len(nodes) {
+				_, nextIsText = nodes[i+1].(Text)
+			} else {
+				nextIsText = false
+			}
 
 			// normalize newlines
 			if strings.Count(ws.Value, "\n") > 1 {
@@ -646,14 +649,15 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 			}
 
 			if nextIsText {
+				// fmt.Fprintf(w, "<<<>>>")
 				fmt.Fprint(w, strings.Repeat("\t", level)) // keep user text indented at same level as blocks
 				continue
 			}
 
-			// if !nextNodeIsBlock(nodes, i) { // let user handle whitespace
-			// 	level = startLevel
-			// 	continue
-			// }
+			if nextNodeIsBlock(nodes, i) { // let user handle whitespace
+				// level = startLevel
+				continue
+			}
 
 			// if prevNodeIsBlock(nodes, i) {
 			// 	continue // we indent automatically
@@ -662,7 +666,7 @@ func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 			continue
 		}
 
-		if isText && isGoTempl {
+		if isText && t.GoTempl {
 			skipTrailing = true
 			level = 0
 		}
@@ -1373,7 +1377,9 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 		return err
 	}
 	for _, c := range t.Children {
-		fmt.Fprintf(os.Stderr, "c: %T\n", c)
+		b := bytes.Buffer{}
+		c.Write(&b, 0)
+		fmt.Fprintf(os.Stderr, "c: %T (%q)\n", c, b.String())
 	}
 	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
 		return err

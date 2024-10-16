@@ -34,13 +34,13 @@ gotempl JoinWith(sep string, items []string) #{
 }#
 
 gotempl WrappedChildren() #{
-  // wrapping children
+	// wrapping children
   { children... }
 	// ended wrapping
 }#
 
 gotempl Package(paramA string, paramB int) #{
-  /*
+	/*
   Package testgousage.
   */
   package testgousage
@@ -58,18 +58,21 @@ gotempl Package(paramA string, paramB int) #{
   // comment with%{ "var" -}%without space
 	%{ "const _ab = " -}% "ab"
 	{{ first := items[0] }}
+	{{ /*FIXME: indent not applying to children of block with text+ws+ start block*/ }}
 	{{ for _, i := range items }}
 		{{ /* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */ }}
 		%{ fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y) }%
 		{{ for _, j := range items }}
 			%{ fmt.Sprintf("// nested %d", j) }%
-		{{ end }}
+			{{ /*FIXME: indent not stopping with text+ws+block (nested)*/ }}
+			// 1
+			{{ end }}
 		// 1
-    {{ /*FIXME: indent not stopping with text+endblock */ }}
-    //1
+    {{ /*FIXME: indent not stopping with text+ws+block */ }}
+		//1
     %{ "a" }%
-    //1
-		{{ end }}
+		//1
+	{{ end }}
 	{{ if true }}
 		%{ "var abc = \"abc\"" }%
 	{{ else if first == 999 }}
@@ -95,15 +98,15 @@ gotempl Package(paramA string, paramB int) #{
 	{{ /*in gotempl, \n is eaten by @ syntax by default
   in case we use 2 elements in the same line. */ }}
 	%{ "" }%
-*/
+	*/
   // Fields: @JoinWith(", ", []string{"a", "b", "c"})
 	%{ "" }%
-type A struct {
+	type A struct {
 	{{ /* templ element calls may have {} */ }}
 	@WrappedChildren() {
 		%{ "// child 1" }%
-// child 2
-	}
+		// child 2
+				}
 	@Fields()
 	}
   @Noop()
@@ -111,5 +114,7 @@ type A struct {
 
 // Combine all tests.
 templ TestComponent() {
+ 
 	@Package("a", 1)
+ 
 }

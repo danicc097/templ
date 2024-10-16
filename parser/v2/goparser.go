@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/a-h/parse"
@@ -55,7 +54,6 @@ func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, endMa
 			src = srcRegular
 		}
 	}
-	fmt.Fprintf(os.Stderr, "src: %s\n", src)
 	from := pi.Position()
 	if src == "" {
 		src, _ = pi.Peek(-1)
