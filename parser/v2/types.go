@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"go/format"
 	"io"
+	"os"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -110,8 +112,9 @@ type Range struct {
 
 // Expression containing Go code.
 type Expression struct {
-	Value string
-	Range Range
+	Value   string
+	Range   Range
+	GoTempl bool
 }
 
 type TemplateFile struct {
@@ -220,12 +223,18 @@ func (p Package) Write(w io.Writer, indent int) error {
 
 // Whitespace.
 type Whitespace struct {
-	Value string
+	Value   string
+	GoTempl bool
 }
 
 func (ws Whitespace) IsNode() bool { return true }
 
 func (ws Whitespace) Write(w io.Writer, indent int) error {
+	if ws.GoTempl {
+		// dont remove whitespace in go templates
+		_, err := io.WriteString(w, strings.ReplaceAll(ws.Value, "\t", "  "))
+		return err
+	}
 	if ws.Value == "" || !strings.Contains(ws.Value, "\n") {
 		return nil
 	}
@@ -407,6 +416,8 @@ type Nodes struct {
 // A Node appears within a template, e.g. an StringExpression, Element, IfExpression etc.
 type Node interface {
 	IsNode() bool
+	// TODO: might be needed for proper gotext formatting in gotempl.
+	// IsInline() bool
 	// Write out the string.
 	Write(w io.Writer, indent int) error
 }
@@ -433,15 +444,29 @@ type Text struct {
 	// Value is the raw HTML encoded value.
 	Value string
 	// TrailingSpace lists what happens after the text.
-	TrailingSpace TrailingSpace
+	TrailingSpace    TrailingSpace
+	TrailingSpaceLit string
+	GoTempl          bool
 }
 
 func (t Text) Trailing() TrailingSpace {
 	return t.TrailingSpace
 }
 
+func (t Text) String() string {
+	return fmt.Sprintf("Text(%s[%s])", t.Value, strconv.Quote(t.TrailingSpaceLit))
+}
+
 func (t Text) IsNode() bool { return true }
 func (t Text) Write(w io.Writer, indent int) error {
+	// FIXME: keep leading space after `gotempl () {\n` and ` {{ end }}\n`
+	// if text comes next.
+	// go template parser already leaves trailing space after `gotempl () {\n`
+	// Whitespace parser parses it, but not printed later.
+	if t.GoTempl { // leave as is since we are not removing whitespace with gotempl.
+		_, err := io.WriteString(w, t.Value+t.TrailingSpaceLit)
+		return err
+	}
 	return writeIndent(w, indent, t.Value)
 }
 
@@ -603,17 +628,84 @@ func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
 
 func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 	startLevel := level
+	var prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
+	var pt, nt Text
+	_, _, _, _, _, _ = nextIsWhitespace, prevIsWhitespace, nextIsText, prevIsText, pt, nt
 	for i := 0; i < len(nodes); i++ {
-		_, isWhitespace := nodes[i].(Whitespace)
+		skipTrailing := false
+		ws, isWhitespace := nodes[i].(Whitespace)
+		t, isText := nodes[i].(Text)
 
-		// Skip whitespace nodes.
-		if isWhitespace {
+		if isWhitespace && ws.GoTempl {
+			if i+1 < len(nodes) {
+				_, nextIsText = nodes[i+1].(Text)
+			} else {
+				nextIsText = false
+			}
+
+			// normalize newlines
+			if strings.Count(ws.Value, "\n") > 1 {
+				ws.Value = strings.ReplaceAll(ws.Value, "\n", "") + "\n"
+			}
+
+			if nextIsText {
+				// fmt.Fprintf(w, "<<<>>>")
+				fmt.Fprint(w, strings.Repeat("\t", level)) // keep user text indented at same level as blocks
+				continue
+			}
+
+			if nextNodeIsBlock(nodes, i) { // let user handle whitespace
+				// level = startLevel
+				continue
+			}
+
+			// if prevNodeIsBlock(nodes, i) {
+			// 	continue // we indent automatically
+			// }
+
 			continue
 		}
+
+		if isText && t.GoTempl {
+			skipTrailing = true
+			level = 0
+		}
+		// if i > 0 {
+		// 	_, prevIsWhitespace = nodes[i-1].(Whitespace)
+		// 	if pt, prevIsText = nodes[i-1].(Text); (prevIsText && isGoTempl) || (isText && nextNodeIsBlock(nodes, i)) {
+		// 		// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
+		// 		level = 0
+		// 	}
+		// }
+
+		// if i+1 < len(nodes) {
+		// 	_, nextIsWhitespace = nodes[i+1].(Whitespace)
+		// 	nt, nextIsText = nodes[i+1].(Text)
+
+		// 	if isWhitespace && prevNodeIsBlock(nodes, i) {
+		// 		// io.WriteString(w, "<><>")
+		// 	}
+
+		// 	if isWhitespace {
+		// 	}
+		// }
+		if nodes[i] == nil {
+			continue
+		}
+
 		if err := nodes[i].Write(w, level); err != nil {
 			return err
 		}
 
+		// if (isWhitespace) && (nextIsText && isGoTempl) {
+		// 	io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
+		// 	continue
+		// }
+
+		if skipTrailing {
+			skipTrailing = false
+			continue
+		}
 		// Apply trailing whitespace if present.
 		trailing := SpaceVertical
 		if wst, isWhitespaceTrailer := nodes[i].(WhitespaceTrailer); isWhitespaceTrailer {
@@ -652,13 +744,32 @@ func nextNodeIsBlock(nodes []Node, i int) bool {
 	return isBlockNode(nodes[i+1])
 }
 
+func prevNodeIsBlock(nodes []Node, i int) bool {
+	if i == 0 {
+		return false
+	}
+	return isBlockNode(nodes[i-1])
+}
+
+func isPrevGoTemplInlineable(nodes []Node, i int) bool {
+	if i == 0 {
+		return false
+	}
+	switch nodes[i-1].(type) {
+	case StringExpression:
+	case GoCode:
+		return true
+	}
+	return false
+}
+
 func isBlockNode(node Node) bool {
 	switch n := node.(type) {
 	case IfExpression:
-		return true
 	case SwitchExpression:
-		return true
 	case ForExpression:
+	case GoForExpression:
+	case GoIfExpression:
 		return true
 	case Element:
 		return n.IsBlockElement() || n.IndentChildren
@@ -944,6 +1055,7 @@ type TemplElementExpression struct {
 	Expression Expression
 	// Children returns the elements in a block element.
 	Children []Node
+	GoTempl  bool
 }
 
 func (tee TemplElementExpression) ChildNodes() []Node {
@@ -1141,6 +1253,7 @@ type GoCode struct {
 	// TrailingSpace lists what happens after the expression.
 	TrailingSpace TrailingSpace
 	Multiline     bool
+	GoTempl       bool
 }
 
 func (gc GoCode) Trailing() TrailingSpace {
@@ -1156,6 +1269,13 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 	if err != nil {
 		source = []byte(gc.Expression.Value)
 	}
+
+	if gc.GoTempl {
+		// TODO: only if line does not start with whitespace + `{{`, else indent
+		err := writeIndent(w, indent, `{{ `+gc.Expression.Value+` }}`)
+		return err
+	}
+
 	if !gc.Multiline {
 		return writeIndent(w, indent, `{{ `, string(source), ` }}`)
 	}
@@ -1170,7 +1290,9 @@ func (gc GoCode) Write(w io.Writer, indent int) error {
 type StringExpression struct {
 	Expression Expression
 	// TrailingSpace lists what happens after the expression.
-	TrailingSpace TrailingSpace
+	TrailingSpace    TrailingSpace
+	GoTempl          bool
+	GoTemplEndMarker bool
 }
 
 func (se StringExpression) Trailing() TrailingSpace {
@@ -1179,9 +1301,22 @@ func (se StringExpression) Trailing() TrailingSpace {
 
 func (se StringExpression) IsNode() bool                  { return true }
 func (se StringExpression) IsStyleDeclarationValue() bool { return true }
-func (se StringExpression) Write(w io.Writer, indent int) error {
+func (se StringExpression) Write(w io.Writer, indent int) (err error) {
 	if isWhitespace(se.Expression.Value) {
 		se.Expression.Value = ""
+	}
+	if se.GoTempl {
+		suf := ` }%`
+		if se.GoTemplEndMarker {
+			suf = ` -}%`
+		}
+		// only write indent if not inlined, else we get \t on every save
+		if se.TrailingSpace != SpaceVertical {
+			_, err = io.WriteString(w, `%{ `+se.Expression.Value+suf)
+		} else {
+			err = writeIndent(w, indent, `%{ `+se.Expression.Value+suf)
+		}
+		return
 	}
 	return writeIndent(w, indent, `{ `, se.Expression.Value, ` }`)
 }
@@ -1218,4 +1353,121 @@ func formatFunctionArguments(expression string) string {
 		source = formatted
 	}
 	return string(source)
+}
+
+// Go template definition.
+//
+//	gotempl Name() {
+//		package main
+//		func main() {
+//			println("hi")
+//		}
+//	}
+type GoTemplate struct {
+	Range      Range
+	Expression Expression
+	Children   []Node
+}
+
+func (t GoTemplate) IsTemplateFileNode() bool { return true }
+
+func (t GoTemplate) Write(w io.Writer, indent int) error {
+	source := formatFunctionArguments(t.Expression.Value)
+	if err := writeIndent(w, indent, "gotempl ", string(source), fmt.Sprintf(" %s\n", gotemplOpenBraceString)); err != nil {
+		return err
+	}
+	for _, c := range t.Children {
+		b := bytes.Buffer{}
+		c.Write(&b, 0)
+		fmt.Fprintf(os.Stderr, "c: %T (%q)\n", c, b.String())
+	}
+	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
+		return err
+	}
+	if err := writeIndent(w, indent, gotemplCloseBraceString); err != nil {
+		return err
+	}
+	return nil
+}
+
+// {{ if p.Type == "test" && p.thing }}
+//
+//	println(var)
+//
+// {{ end }}
+type GoIfExpression struct {
+	Expression Expression
+	Then       []Node
+	ElseIfs    []GoElseIfExpression
+	Else       []Node
+}
+
+type GoElseIfExpression struct {
+	Expression Expression
+	Then       []Node
+}
+
+func (n GoIfExpression) ChildNodes() []Node {
+	var nodes []Node
+	nodes = append(nodes, n.Then...)
+	nodes = append(nodes, n.Else...)
+	for _, elseIf := range n.ElseIfs {
+		nodes = append(nodes, elseIf.Then...)
+	}
+	return nodes
+}
+
+func (ie GoIfExpression) IsNode() bool { return true }
+
+func (ie GoIfExpression) Write(w io.Writer, indent int) error {
+	if err := writeIndent(w, indent, "{{ if ", ie.Expression.Value, " }}\n"); err != nil {
+		return err
+	}
+	if err := writeNodesIndented(w, indent+1, ie.Then); err != nil {
+		return err
+	}
+	for _, elif := range ie.ElseIfs {
+		if err := elif.Write(w, indent); err != nil {
+			return err
+		}
+	}
+	if len(ie.Else) > 0 {
+		if err := writeIndent(w, indent, "{{ else }}\n"); err != nil {
+			return err
+		}
+		if err := writeNodesIndented(w, indent+1, ie.Else); err != nil {
+			return err
+		}
+	}
+	if err := writeIndent(w, indent, "{{ end }}"); err != nil {
+		return err
+	}
+	return nil
+}
+
+// {{ for i, v := range p.Addresses }}
+//
+//	{! Address(v) }
+//
+// {{ end }}
+type GoForExpression struct {
+	Expression Expression
+	Children   []Node
+}
+
+func (fe GoForExpression) ChildNodes() []Node {
+	return fe.Children
+}
+func (fe GoForExpression) IsNode() bool { return true }
+func (fe GoForExpression) Write(w io.Writer, indent int) error {
+	if err := writeIndent(w, indent, "{{ for ", fe.Expression.Value, " }}\n"); err != nil {
+		return err
+	}
+	if err := writeNodesIndented(w, indent+1, fe.Children); err != nil {
+		return err
+	}
+	if err := writeIndent(w, indent, "{{ end }}"); err != nil {
+		return err
+	}
+	return nil
 }

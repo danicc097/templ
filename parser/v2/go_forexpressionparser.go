@@ -1,0 +1,60 @@
+package parser
+
+import (
+	"github.com/a-h/parse"
+	"github.com/a-h/templ/parser/v2/goexpression"
+)
+
+var goForExpression parse.Parser[Node] = goForExpressionParser{}
+
+type goForExpressionParser struct{}
+
+func (goForExpressionParser) Parse(pi *parse.Input) (n Node, ok bool, err error) {
+	var r GoForExpression
+	start := pi.Index()
+
+	// do not remove leading whitespace, since string expression go templates can be inlined
+	// _, _, _ = parse.OptionalWhitespace.Parse(pi)
+
+	if _, ok, err = parse.All(
+		parse.OptionalWhitespace,
+		parse.String("{{"),
+		parse.OptionalWhitespace,
+	).Parse(pi); err != nil || !ok {
+		pi.Seek(start)
+		return r, false, nil
+	}
+
+	if !peekPrefix(pi, "for ") {
+		// not a for loop
+		pi.Seek(start)
+		return r, false, nil
+	}
+
+	if r.Expression, err = parseGo("for", pi, goexpression.For); err != nil {
+		return r, false, err
+	}
+	r.Expression.GoTempl = true
+
+	if _, ok, err = parse.All(parse.OptionalWhitespace, parse.String("}}")).Parse(pi); err != nil || !ok {
+		err = parse.Error(`for: expected closing "}}" but was not found`, pi.Position())
+		return r, false, err
+	}
+
+	// Parse the body of the `for` loop (everything until `{{ end }}`).
+	// There may be other gotempl statements in between.
+	tnp := newGoTemplateNodeParser(goTemplExpressionEnd, "for expression closing {{end}}")
+	var nodes Nodes
+	if nodes, ok, err = tnp.Parse(pi); err != nil || !ok {
+		err = parse.Error("for: expected nodes, but none were found", pi.Position())
+		return
+	}
+	r.Children = nodes.Nodes
+
+	if _, ok, err = goTemplExpressionEnd.Parse(pi); err != nil || !ok {
+		err = parse.Error("for: missing `{{ end }}`", pi.Position())
+		return
+	}
+
+	return r, true, nil
+}

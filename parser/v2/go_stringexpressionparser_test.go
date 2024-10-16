@@ -7,39 +7,66 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestStringExpressionParser(t *testing.T) {
+func TestGoStringExpressionParser(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
 		expected StringExpression
 	}{
 		{
-			name:  "basic expression",
-			input: `{ fmt.Sprintf("%s", "this") }`,
+			name:  "basic expression 1",
+			input: `%{ fmt.Sprintf("%s", "this") }%`,
 			expected: StringExpression{
+				GoTempl: true,
 				Expression: Expression{
-					Value: `fmt.Sprintf("%s", "this")`,
+					GoTempl: true,
+					Value:   `fmt.Sprintf("%s", "this")`,
 					Range: Range{
 						From: Position{
-							Index: 2,
+							Index: 3,
 							Line:  0,
-							Col:   2,
+							Col:   3,
 						},
 						To: Position{
-							Index: 27,
+							Index: 28,
 							Line:  0,
-							Col:   27,
+							Col:   28,
 						},
 					},
 				},
 			},
 		},
 		{
-			name:  "basic expression",
-			input: `{ "this" }`,
+			name:  "basic expression 2",
+			input: `%{ "this" }%`,
 			expected: StringExpression{
+				GoTempl: true,
 				Expression: Expression{
-					Value: `"this"`,
+					GoTempl: true,
+					Value:   `"this"`,
+					Range: Range{
+						From: Position{
+							Index: 3,
+							Line:  0,
+							Col:   3,
+						},
+						To: Position{
+							Index: 9,
+							Line:  0,
+							Col:   9,
+						},
+					},
+				},
+			},
+		},
+		{
+			name:  "no spaces",
+			input: `%{"this"}%`,
+			expected: StringExpression{
+				GoTempl: true,
+				Expression: Expression{
+					GoTempl: true,
+					Value:   `"this"`,
 					Range: Range{
 						From: Position{
 							Index: 2,
@@ -56,44 +83,49 @@ func TestStringExpressionParser(t *testing.T) {
 			},
 		},
 		{
-			name:  "no spaces",
-			input: `{"this"}`,
+			name: "multiple lines",
+			input: `%{ test{}.Call(a,
+		b,
+	  c) }%`,
 			expected: StringExpression{
+				GoTempl: true,
 				Expression: Expression{
-					Value: `"this"`,
+					GoTempl: true,
+					Value:   "test{}.Call(a,\n\t\tb,\n\t  c)",
 					Range: Range{
 						From: Position{
-							Index: 1,
+							Index: 3,
 							Line:  0,
-							Col:   1,
+							Col:   3,
 						},
 						To: Position{
-							Index: 7,
-							Line:  0,
-							Col:   7,
+							Index: 28,
+							Line:  2,
+							Col:   5,
 						},
 					},
 				},
 			},
 		},
 		{
-			name: "multiple lines",
-			input: `{ test{}.Call(a,
-		b,
-	  c) }`,
+			name:  "basic expression with end marker",
+			input: `%{ "this" -}%`,
 			expected: StringExpression{
+				GoTempl:          true,
+				GoTemplEndMarker: true,
 				Expression: Expression{
-					Value: "test{}.Call(a,\n\t\tb,\n\t  c)",
+					GoTempl: true,
+					Value:   `"this"`,
 					Range: Range{
 						From: Position{
-							Index: 2,
+							Index: 3,
 							Line:  0,
-							Col:   2,
+							Col:   3,
 						},
 						To: Position{
-							Index: 27,
-							Line:  2,
-							Col:   5,
+							Index: 9,
+							Line:  0,
+							Col:   9,
 						},
 					},
 				},
@@ -104,7 +136,7 @@ func TestStringExpressionParser(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			input := parse.NewInput(tt.input)
-			an, ok, err := stringExpression.Parse(input)
+			an, ok, err := gostringExpression.Parse(input)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

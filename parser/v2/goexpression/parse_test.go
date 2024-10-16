@@ -608,7 +608,7 @@ func TestSliceArgs(t *testing.T) {
 	for _, test := range sliceArgsTests {
 		for i, suffix := range suffixes {
 			t.Run(fmt.Sprintf("%s_%d", test.name, i), func(t *testing.T) {
-				expr, err := SliceArgs(test.input + suffix)
+				expr, err := SliceArgs(test.input+suffix, "}")
 				if err != nil {
 					t.Errorf("failed to parse slice args: %v", err)
 				}
@@ -633,7 +633,7 @@ func FuzzSliceArgs(f *testing.F) {
 		}
 	}
 	f.Fuzz(func(t *testing.T, s string) {
-		_, err := SliceArgs(s)
+		_, err := SliceArgs(s, "}")
 		if err != nil {
 			t.Skip()
 			return

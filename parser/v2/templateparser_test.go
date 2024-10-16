@@ -8,7 +8,7 @@ import (
 )
 
 func TestTemplateParser(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name        string
 		input       string
 		expected    HTMLTemplate
@@ -406,7 +406,7 @@ func TestTemplateParser(t *testing.T) {
 									To:   Position{Index: 46, Line: 2, Col: 7},
 								},
 								Children: []Node{
-									Whitespace{"\n\t\t\t"},
+									Whitespace{Value: "\n\t\t\t"},
 									StringExpression{
 										Expression: Expression{
 											Value: `"span content"`,
@@ -718,14 +718,14 @@ func TestTemplateParser(t *testing.T) {
 			name: "template: can contain HTML comments",
 			input: `templ x() {
 	<!-- Single line -->
-	<!-- 
+	<!--
 		Multiline
 	-->
 }`,
 			expected: HTMLTemplate{
 				Range: Range{
 					From: Position{Index: 0, Line: 0, Col: 0},
-					To:   Position{Index: 59, Line: 5, Col: 1},
+					To:   Position{Index: 58, Line: 5, Col: 1},
 				},
 				Expression: Expression{
 					Value: "x()",
@@ -738,7 +738,7 @@ func TestTemplateParser(t *testing.T) {
 					Whitespace{Value: "\t"},
 					HTMLComment{Contents: " Single line "},
 					Whitespace{Value: "\n\t"},
-					HTMLComment{Contents: " \n\t\tMultiline\n\t"},
+					HTMLComment{Contents: "\n\t\tMultiline\n\t"},
 					Whitespace{Value: "\n"},
 				},
 			},
@@ -796,7 +796,7 @@ func TestTemplateParser(t *testing.T) {
 							},
 						}},
 						Children: []Node{
-							Whitespace{"\n\t\t\t"},
+							Whitespace{Value: "\n\t\t\t"},
 							ChildrenExpression{},
 							Whitespace{Value: "\n\t\t"},
 						},
@@ -866,7 +866,7 @@ func TestTemplateParser(t *testing.T) {
 }
 
 func TestTemplateParserErrors(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name     string
 		input    string
 		expected string

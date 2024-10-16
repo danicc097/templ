@@ -62,6 +62,7 @@ func (prodLiteralWriter) closeLiteral(indent int) string {
 }
 
 func (prodLiteralWriter) writeLiteral(inLiteral bool, s string) string {
+	// fmt.Printf("s (inltieral=%v): %v\n", inLiteral, s) // FIXME: (inltieral=false): (( fmt.Sprintf(\"// %s-%d-%d-%s\", ab(), i, first, y) ))\n
 	if inLiteral {
 		return s
 	}

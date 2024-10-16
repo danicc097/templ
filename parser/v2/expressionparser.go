@@ -26,31 +26,80 @@ func ExpressionOf(p parse.Parser[string]) parse.Parser[Expression] {
 	})
 }
 
-var lt = parse.Rune('<')
-var gt = parse.Rune('>')
-var openBrace = parse.String("{")
-var optionalSpaces = parse.StringFrom(parse.Optional(
-	parse.AtLeast(1, parse.Rune(' '))))
+var (
+	lt             = parse.Rune('<')
+	gt             = parse.Rune('>')
+	openBrace      = parse.String("{")
+	optionalSpaces = parse.StringFrom(parse.Optional(
+		parse.AtLeast(1, parse.Rune(' '))))
+	optionalSpacesOrNewlines = parse.StringFrom(
+		parse.Optional(parse.AtLeast(1, parse.Rune(' '))),
+		parse.Optional(parse.AtLeast(1, parse.NewLine)),
+	)
+)
+
 var openBraceWithPadding = parse.StringFrom(optionalSpaces,
 	openBrace,
 	optionalSpaces)
 var openBraceWithOptionalPadding = parse.Any(openBraceWithPadding, openBrace)
 
-var closeBrace = parse.String("}")
-var closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
+const (
+	gotemplCloseBraceString = "}#"
+	gotemplOpenBraceString  = "#{"
+)
 
-var dblCloseBrace = parse.String("}}")
-var dblCloseBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseBrace)
+var (
+	closeBrace                    = parse.String("}")
+	gotemplCloseBrace             = parse.String(gotemplCloseBraceString)
+	closeBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, closeBrace)
+	// in gotempl we have go code as text that interferes with template def brackets
+	gotemplLastCloseBraceWithOptionalPadding = parse.Any(
+		parse.StringFrom(optionalSpaces, gotemplCloseBrace, optionalSpacesOrNewlines, parse.EOF[string]()),
+		parse.StringFrom(optionalSpaces, gotemplCloseBrace, parse.NewLine, parse.NewLine),
+	)
+	gotemplOpenBraceWithOptionalPadding = parse.StringFrom(
+		optionalSpaces,
+		parse.String(gotemplOpenBraceString),
+		optionalSpaces,
+	)
+)
 
-var openBracket = parse.String("(")
-var closeBracket = parse.String(")")
+var (
+	dblCloseBrace                    = parse.String("}}")
+	dblCloseBraceWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseBrace)
+)
 
-var stringUntilNewLine = parse.StringUntil[string](parse.NewLine)
-var newLineOrEOF = parse.Or(parse.NewLine, parse.EOF[string]())
-var stringUntilNewLineOrEOF = parse.StringUntil(newLineOrEOF)
+var (
+	dblCloseParens                    = parse.String("))")
+	dblCloseParensWithOptionalPadding = parse.StringFrom(optionalSpaces, dblCloseParens)
+)
 
-var jsOrGoSingleLineComment = parse.StringFrom(parse.String("//"), parse.StringUntil(parse.Any(parse.NewLine, parse.EOF[string]())))
-var jsOrGoMultiLineComment = parse.StringFrom(parse.String("/*"), parse.StringUntil(parse.String("*/")))
+// %{ ... }% allows us to reuse most of the existing string expression parser logic
+var (
+	closeGotemplStringExpr                    = parse.String("}%")
+	closeGotemplStringExprWithMarker          = parse.String("-}%")
+	openGotemplStringExpr                     = parse.String("%{")
+	closeGotemplStringExprWithOptionalPadding = parse.StringFrom(optionalSpaces, parse.Any(closeGotemplStringExpr, closeGotemplStringExprWithMarker))
+	openGotemplStringExprWithOptionalPadding  = parse.StringFrom(openGotemplStringExpr, optionalSpaces)
+)
+
+var templElementStart = parse.StringFrom(parse.Rune('@'), parse.MustRegexp(`^[a-zA-Z_][a-zA-Z0-9_]*`), parse.Rune('('))
+
+var (
+	openParens  = parse.String("(")
+	closeParens = parse.String(")")
+)
+
+var (
+	stringUntilNewLine      = parse.StringUntil[string](parse.NewLine)
+	newLineOrEOF            = parse.Or(parse.NewLine, parse.EOF[string]())
+	stringUntilNewLineOrEOF = parse.StringUntil(newLineOrEOF)
+)
+
+var (
+	jsOrGoSingleLineComment = parse.StringFrom(parse.String("//"), parse.StringUntil(parse.Any(parse.NewLine, parse.EOF[string]())))
+	jsOrGoMultiLineComment  = parse.StringFrom(parse.String("/*"), parse.StringUntil(parse.String("*/")))
+)
 
 var exp = expressionParser{
 	startBraceCount: 1,
@@ -153,8 +202,10 @@ loop:
 
 // Letters and digits
 
-var octal_digit = parse.RuneIn("01234567")
-var hex_digit = parse.RuneIn("0123456789ABCDEFabcdef")
+var (
+	octal_digit = parse.RuneIn("01234567")
+	hex_digit   = parse.RuneIn("0123456789ABCDEFabcdef")
+)
 
 // https://go.dev/ref/spec#Rune_literals
 

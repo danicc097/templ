@@ -22,6 +22,10 @@ func parseGoFuncDecl(prefix string, pi *parse.Input) (name string, expression Ex
 	return name, NewExpression(expr, pi.PositionAt(from+len(prefix)), to), nil
 }
 
+func parseGoTemplFuncDecl(pi *parse.Input) (name string, expression Expression, err error) {
+	return parseGoFuncDecl("gotempl", pi)
+}
+
 func parseTemplFuncDecl(pi *parse.Input) (name string, expression Expression, err error) {
 	return parseGoFuncDecl("templ", pi)
 }
@@ -30,16 +34,37 @@ func parseCSSFuncDecl(pi *parse.Input) (name string, expression Expression, err 
 	return parseGoFuncDecl("css", pi)
 }
 
-func parseGoSliceArgs(pi *parse.Input) (r Expression, err error) {
+func parseGoSliceArgs(pi *parse.Input, closingChars string) (r Expression, endMarker bool, err error) {
+	var src string
+	if closingChars == "}%" {
+		start := pi.Index()
+		// attempt both and keep the one that has the shortest string length
+		// since we are parsing the whole remaining input
+		srcMarker, srcMarkerOk, _ := parse.StringUntil(parse.StringFrom(parse.OptionalWhitespace, closeGotemplStringExprWithMarker)).Parse(pi)
+		pi.Seek(start)
+		srcRegular, srcRegularOk, _ := parse.StringUntil(parse.StringFrom(parse.OptionalWhitespace, closeGotemplStringExpr)).Parse(pi)
+		pi.Seek(start)
+		if !srcMarkerOk && !srcRegularOk {
+			return r, false, fmt.Errorf("invalid go expression: %v", err)
+		}
+		if len(srcMarker) < len(srcRegular) && srcMarkerOk {
+			src = srcMarker
+			endMarker = true
+		} else {
+			src = srcRegular
+		}
+	}
 	from := pi.Position()
-	src, _ := pi.Peek(-1)
-	expr, err := goexpression.SliceArgs(src)
+	if src == "" {
+		src, _ = pi.Peek(-1)
+	}
+	expr, err := goexpression.SliceArgs(src, closingChars)
 	if err != nil {
-		return r, err
+		return r, false, err
 	}
 	pi.Take(len(expr))
 	to := pi.Position()
-	return NewExpression(expr, from, to), nil
+	return NewExpression(expr, from, to), endMarker, nil
 }
 
 func peekPrefix(pi *parse.Input, prefixes ...string) bool {
@@ -66,5 +91,31 @@ func parseGo(name string, pi *parse.Input, e extractor) (r Expression, err error
 	}
 	expr := src[start:end]
 	pi.Take(end)
+	return NewExpression(expr, pi.PositionAt(from+start), pi.PositionAt(from+end)), nil
+}
+
+func parseGotemplIf(name string, pi *parse.Input) (r Expression, err error) {
+	from := pi.Index()
+
+	var ok bool
+	var ifBlock string
+	if ifBlock, ok, err = gountilIfBlockEnd.Parse(pi); err != nil || !ok {
+		pi.Seek(from)
+		if err == nil && !ok {
+			return r, parse.Error("%s: invalid go expression", pi.Position())
+		}
+		return r, parse.Error(fmt.Sprintf("%s: invalid go expression: %v", name, err.Error()), pi.Position())
+	}
+	ifBlock = strings.TrimPrefix(ifBlock, "else ")
+
+	start, end, err := goexpression.If(ifBlock + "{}")
+	if err != nil {
+		return r, parse.Error(fmt.Sprintf("%s: invalid go expression: %v", name, err.Error()), pi.Position())
+	}
+	if start > end || start < 0 || end < 0 || end > len(ifBlock) {
+		return r, parse.Error("invalid go expression", pi.Position())
+	}
+	expr := ifBlock[start:end]
+
 	return NewExpression(expr, pi.PositionAt(from+start), pi.PositionAt(from+end)), nil
 }

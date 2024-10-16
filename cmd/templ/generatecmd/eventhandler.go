@@ -241,11 +241,11 @@ func (h *FSEventHandler) generate(ctx context.Context, fileName string) (goUpdat
 	if err != nil {
 		return false, false, nil, fmt.Errorf("%s generation error: %w", fileName, err)
 	}
-
 	formattedGoCode, err := format.Source(b.Bytes())
 	if err != nil {
 		err = remapErrorList(err, sourceMap, fileName)
-		return false, false, nil, fmt.Errorf("% source formatting error %w", fileName, err)
+		fmt.Printf("formattedGoCode err: %v\n", b.String())
+		return false, false, nil, fmt.Errorf("%s: source formatting error %w", fileName, err)
 	}
 
 	// Hash output, and write out the file if the goCodeHash has changed.

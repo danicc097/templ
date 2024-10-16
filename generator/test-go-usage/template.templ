@@ -1,0 +1,120 @@
+package testgousage
+
+import "fmt"
+
+const a = "a"
+const b = "b"
+const c = "c"
+
+var items = [...]int{1, 2, 3}
+
+func ab() string {
+	return `"ab"`
+}
+
+/*
+rawgo syntax in base templ not experimental anymore.
+can adopt the same in gotempl expressions for consistency
+*/
+
+gotempl Fields() #{
+	{{ for _, i := range []string{"a", "b", "c"} }}
+		%{ fmt.Sprintf("%s string", i) }%
+	{{ end }}
+}#
+
+gotempl JoinWith(sep string, items []string) #{
+	{{ for _, i := range items }}
+		{{ if i != items[len(items)-1] }}
+			%{ fmt.Sprintf("%s%s", i, sep) -}%
+		{{ else }}
+			%{ i -}%
+		{{ end }}
+	{{ end }}
+}#
+
+gotempl WrappedChildren() #{
+	// wrapping children
+  { children... }
+	// ended wrapping
+}#
+
+gotempl Package(paramA string, paramB int) #{
+	/*
+  Package testgousage.
+  */
+  package testgousage
+
+  // A comment that should be rendered
+  /* Another comment that should be rendered
+  */
+	{{ /* TODO: use GenerationEvent to gofumpt, dont change _templ.go codegen */ }}
+	{{ /**/ }}
+	{{ /* this should not be printed */ }}
+	{{ /* this should not be printed */
+  y := "y" }}
+	{{ _ = paramA }}
+	// comment with %{ "var" -}% with space
+  // comment with%{ "var" -}%without space
+	%{ "const _ab = " -}% "ab"
+	{{ first := items[0] }}
+	{{ /*FIXME: indent not applying to children of block with text+ws+ start block*/ }}
+	{{ for _, i := range items }}
+		{{ /* comment in with ignored syntax %{ "var" }%  {{ a := "" }} */ }}
+		%{ fmt.Sprintf("// %s-%d-%d-%s", ab(), i, first, y) }%
+		{{ for _, j := range items }}
+			%{ fmt.Sprintf("// nested %d", j) }%
+			{{ /*FIXME: indent not stopping with text+ws+block (nested)*/ }}
+			// 1
+			{{ end }}
+		// 1
+    {{ /*FIXME: indent not stopping with text+ws+block */ }}
+		//1
+    %{ "a" }%
+		//1
+	{{ end }}
+	{{ if true }}
+		%{ "var abc = \"abc\"" }%
+	{{ else if first == 999 }}
+		%{ "should never print this" }%
+	{{ else }}
+		%{ "should never print this either" }%
+	{{ end }}
+	func main() {
+    const z = "z"
+    for i := 0; i < 3; i++ { println("z") }
+    for i := 0; i < 3; i++ {
+      println("z")
+    }
+    _ = map[string][]A{
+  {{ /* can escape conflicting syntax */ }}
+	"a": %{ "[]A{{}, {}, {}}" -}%,
+    }
+  }
+
+  /*
+   * Fields: @JoinWith(", ", []string{"a", "b", "c"})
+%{ " || " -}% @JoinWith(", ", []string{"a", "b", "c"})
+	{{ /*in gotempl, \n is eaten by @ syntax by default
+  in case we use 2 elements in the same line. */ }}
+	%{ "" }%
+	*/
+  // Fields: @JoinWith(", ", []string{"a", "b", "c"})
+	%{ "" }%
+	type A struct {
+	{{ /* templ element calls may have {} */ }}
+	@WrappedChildren() {
+		%{ "// child 1" }%
+		// child 2
+				}
+	@Fields()
+	}
+  @Noop()
+}#
+
+// Combine all tests.
+templ TestComponent() {
+ 
+	@Package("a", 1)
+ 
+}

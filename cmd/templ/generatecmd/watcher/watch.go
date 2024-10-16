@@ -53,6 +53,7 @@ func WalkFiles(ctx context.Context, path string, out chan fsnotify.Event) (err e
 		if !shouldIncludeFile(absPath) {
 			return nil
 		}
+
 		out <- fsnotify.Event{
 			Name: absPath,
 			Op:   fsnotify.Create,

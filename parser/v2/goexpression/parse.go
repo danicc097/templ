@@ -59,6 +59,7 @@ func If(content string) (start, end int, err error) {
 		if !ok {
 			return 0, 0, ErrExpectedNodeNotFound
 		}
+
 		start = int(stmt.If) + len("if")
 		end = latestEnd(start, stmt.Init, stmt.Cond)
 		return start, end, nil
@@ -194,10 +195,9 @@ loop:
 	return start, end, nil
 }
 
-func SliceArgs(content string) (expr string, err error) {
-	prefix := "package main\nvar templ_args = []any{"
-	src := prefix + content + "}"
-
+func SliceArgs(content string, closingChars string) (expr string, err error) {
+	c := content
+	src := "package main\nvar templ_args = []any{" + c + "}"
 	node, parseErr := parser.ParseFile(token.NewFileSet(), "", src, parser.AllErrors)
 	if node == nil {
 		return expr, parseErr
@@ -230,7 +230,6 @@ func SliceArgs(content string) (expr string, err error) {
 		}
 		return false
 	})
-
 	return src[from:to], err
 }
 

@@ -60,14 +60,14 @@ var scriptExpressionParser = parse.Func(func(pi *parse.Input) (r scriptExpressio
 	}
 
 	// Eat the open bracket.
-	if _, ok, err = openBracket.Parse(pi); err != nil || !ok {
+	if _, ok, err = openParens.Parse(pi); err != nil || !ok {
 		err = parse.Error("script expression: parameters missing open bracket", pi.Position())
 		return
 	}
 
 	// Read the parameters.
 	// p Person, other Other, t thing.Thing)
-	if r.Parameters, ok, err = ExpressionOf(parse.StringUntil(closeBracket)).Parse(pi); err != nil || !ok {
+	if r.Parameters, ok, err = ExpressionOf(parse.StringUntil(closeParens)).Parse(pi); err != nil || !ok {
 		err = parse.Error("script expression: parameters missing close bracket", pi.Position())
 		return
 	}
