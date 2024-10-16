@@ -233,7 +233,7 @@ func (ws Whitespace) Write(w io.Writer, indent int) error {
 	if ws.GoTempl {
 		// dont remove whitespace in go templates
 		fmt.Fprintf(os.Stderr, "ws.Value: %v\n", ws.Value)
-		_, err := io.WriteString(w, ws.Value)
+		_, err := io.WriteString(w, strings.ReplaceAll(ws.Value, "\t", "  "))
 		return err
 	}
 	if ws.Value == "" || !strings.Contains(ws.Value, "\n") {
@@ -630,63 +630,74 @@ func writeNodesIndented(w io.Writer, level int, nodes []Node) error {
 func writeNodes(w io.Writer, level int, nodes []Node, indent bool) error {
 	startLevel := level
 	var skipTrailing, prevIsWhitespace, nextIsWhitespace, nextIsText, prevIsText bool
-	_ = nextIsWhitespace
 	var pt, nt Text
-
+	_, _, _, _, _, _, _ = nextIsWhitespace, prevIsWhitespace, nextIsText, prevIsText, skipTrailing, pt, nt
+	var isGoTempl bool
 	for i := 0; i < len(nodes); i++ {
-		_, isWhitespace := nodes[i].(Whitespace)
-		text, isText := nodes[i].(Text)
+		ws, isWhitespace := nodes[i].(Whitespace)
+		_, isText := nodes[i].(Text)
 
-		if i > 0 {
-			_, prevIsWhitespace = nodes[i-1].(Whitespace)
-			if pt, prevIsText = nodes[i-1].(Text); prevIsText && pt.GoTempl {
-				// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
-				level = 0
+		if isWhitespace && ws.GoTempl {
+			isGoTempl = true
+
+			// normalize newlines
+			if strings.Count(ws.Value, "\n") > 1 {
+				ws.Value = strings.ReplaceAll(ws.Value, "\n", "") + "\n"
 			}
-		}
 
-		if i+1 < len(nodes) {
-			_, nextIsWhitespace = nodes[i+1].(Whitespace)
-			nt, nextIsText = nodes[i+1].(Text)
-			if isWhitespace && nextIsText && nt.GoTempl { // add leading space (text only captures trailing)
-				// only apply leading space is not important is
-				if !isPrevGoTemplInlineable(nodes, i) {
-					pre := strings.Repeat("\t", level)
-					io.WriteString(w, pre)
-				}
+			if nextIsText {
+				fmt.Fprint(w, strings.Repeat("\t", level)) // keep user text indented at same level as blocks
 				continue
 			}
-			if !isWhitespace && prevIsWhitespace && nextIsText && nt.GoTempl {
-			}
+
+			// if !nextNodeIsBlock(nodes, i) { // let user handle whitespace
+			// 	level = startLevel
+			// 	continue
+			// }
+
+			// if prevNodeIsBlock(nodes, i) {
+			// 	continue // we indent automatically
+			// }
+
+			continue
 		}
+
+		if isText && isGoTempl {
+			skipTrailing = true
+			level = 0
+		}
+		// if i > 0 {
+		// 	_, prevIsWhitespace = nodes[i-1].(Whitespace)
+		// 	if pt, prevIsText = nodes[i-1].(Text); (prevIsText && isGoTempl) || (isText && nextNodeIsBlock(nodes, i)) {
+		// 		// previous gotext has captured its trailing whitespace, so dont add any whitespace or indentation
+		// 		level = 0
+		// 	}
+		// }
+
+		// if i+1 < len(nodes) {
+		// 	_, nextIsWhitespace = nodes[i+1].(Whitespace)
+		// 	nt, nextIsText = nodes[i+1].(Text)
+
+		// 	if isWhitespace && prevNodeIsBlock(nodes, i) {
+		// 		// io.WriteString(w, "<><>")
+		// 	}
+
+		// 	if isWhitespace {
+		// 	}
+		// }
 		if nodes[i] == nil {
 			continue
-		}
-		if isWhitespace { //&& isPrevGoTemplInlineable(nodes, i) {
-			continue
-		}
-
-		if isText && text.GoTempl {
-			skipTrailing = true
-
-			if !prevIsText && !nextIsText && text.TrailingSpace != SpaceVertical {
-				skipTrailing = false
-				// TODO: this requires IsInline for nodes so we only indent when prev is !IsInline
-				// fmt.Fprintf(w, "[[%s]](%t)\n", strconv.Quote(text.Value), nextIsWhitespace)
-				if !isPrevGoTemplInlineable(nodes, i) && !nextNodeIsBlock(nodes, i) {
-					io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
-				}
-			}
 		}
 
 		if err := nodes[i].Write(w, level); err != nil {
 			return err
 		}
 
-		if (isWhitespace) && (nextIsText && nt.GoTempl) {
-			io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
-			continue
-		}
+		// if (isWhitespace) && (nextIsText && isGoTempl) {
+		// 	io.WriteString(w, "\t") // TODO: depends on inlined gotempl expressions as well
+		// 	continue
+		// }
+
 		if skipTrailing {
 			skipTrailing = false
 			continue
@@ -742,7 +753,6 @@ func isPrevGoTemplInlineable(nodes []Node, i int) bool {
 	}
 	switch nodes[i-1].(type) {
 	case StringExpression:
-		return true
 	case GoCode:
 		return true
 	}
@@ -752,13 +762,9 @@ func isPrevGoTemplInlineable(nodes []Node, i int) bool {
 func isBlockNode(node Node) bool {
 	switch n := node.(type) {
 	case IfExpression:
-		return true
 	case SwitchExpression:
-		return true
 	case ForExpression:
-		return true
 	case GoForExpression:
-		return true
 	case GoIfExpression:
 		return true
 	case Element:
@@ -1365,6 +1371,9 @@ func (t GoTemplate) Write(w io.Writer, indent int) error {
 	source := formatFunctionArguments(t.Expression.Value)
 	if err := writeIndent(w, indent, "gotempl ", string(source), fmt.Sprintf(" %s\n", gotemplOpenBraceString)); err != nil {
 		return err
+	}
+	for _, c := range t.Children {
+		fmt.Fprintf(os.Stderr, "c: %T\n", c)
 	}
 	if err := writeNodesIndented(w, indent+1, t.Children); err != nil {
 		return err

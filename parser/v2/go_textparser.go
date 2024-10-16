@@ -10,6 +10,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	// src, _ := pi.Peek(-1)
 	from := pi.Position()
 	t := Text{GoTempl: true}
+	// parse at most current line's text only
 	if t.Value, ok, err = untilGoTemplOrNewLine.Parse(pi); err != nil || !ok {
 		pi.Seek(from.Index)
 		return
@@ -23,7 +24,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	}
 	t.Range = NewRange(from, pi.Position())
 
-	// wsStart := pi.Index()
+	wsStart := pi.Index()
 	t.TrailingSpaceLit, _, err = parse.Whitespace.Parse(pi)
 	if err != nil {
 		return t, false, err
@@ -32,7 +33,7 @@ var gotextParser = parse.Func(func(pi *parse.Input) (n Node, ok bool, err error)
 	if err != nil {
 		return t, false, err
 	}
-	// pi.Seek(wsStart) // leave whitespace for the next parser so bare text spacing is not formatted by templ
+	pi.Seek(wsStart) // leave whitespace for the next parser (which will be the whitespace parser) so bare text spacing is not formatted by templ
 
 	return t, true, nil
 })

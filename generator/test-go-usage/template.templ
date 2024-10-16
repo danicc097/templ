@@ -34,13 +34,13 @@ gotempl JoinWith(sep string, items []string) #{
 }#
 
 gotempl WrappedChildren() #{
-// wrapping children
+  // wrapping children
   { children... }
 	// ended wrapping
 }#
 
 gotempl Package(paramA string, paramB int) #{
-/*
+  /*
   Package testgousage.
   */
   package testgousage
@@ -66,7 +66,10 @@ gotempl Package(paramA string, paramB int) #{
 		{{ end }}
 		// 1
     {{ /*FIXME: indent not stopping with text+endblock */ }}
-	{{ end }}
+    //1
+    %{ "a" }%
+    //1
+		{{ end }}
 	{{ if true }}
 		%{ "var abc = \"abc\"" }%
 	{{ else if first == 999 }}
@@ -88,7 +91,6 @@ gotempl Package(paramA string, paramB int) #{
 
   /*
    * Fields: @JoinWith(", ", []string{"a", "b", "c"})
-	{{ /* templ element calls may have {} */ }}
 %{ " || " -}% @JoinWith(", ", []string{"a", "b", "c"})
 	{{ /*in gotempl, \n is eaten by @ syntax by default
   in case we use 2 elements in the same line. */ }}
@@ -97,10 +99,11 @@ gotempl Package(paramA string, paramB int) #{
   // Fields: @JoinWith(", ", []string{"a", "b", "c"})
 	%{ "" }%
 type A struct {
-  @WrappedChildren() {
-	%{ "// child 1" }%
+	{{ /* templ element calls may have {} */ }}
+	@WrappedChildren() {
+		%{ "// child 1" }%
 // child 2
-  }
+	}
 	@Fields()
 	}
   @Noop()
